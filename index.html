@@ -12,6 +12,7 @@
 --bg-color: #030303;
 --accent: #00f2ff;
 --accent-glow: rgba(0, 242, 255, 0.3);
+--box-color-rgb: 255, 255, 255;
 --box-size: 150px;
 --box-radius: 16px;
 --box-opacity: 0.04;
@@ -21,304 +22,284 @@
 --gap: 20px;
 }
 
-* { cursor: none !important; box-sizing: border-box; }
+/* --- GLOBAL SETUP --- */
+* { cursor: none !important; box-sizing: border-box; outline: none; }
 
 body {
-margin: 0;
-height: 100vh;
-background: var(--bg-color);
-font-family: 'Plus Jakarta Sans', sans-serif;
-color: white;
-overflow: hidden;
-display: flex;
-flex-direction: column;
+margin: 0; height: 100vh; background: var(--bg-color);
+font-family: 'Plus Jakarta Sans', sans-serif; color: white;
+overflow: hidden; display: flex; flex-direction: column;
 transition: background 0.5s ease;
 }
 
 #particleCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-/* --- UI ELEMENTS --- */
-.top-nav {
-position: relative;
-z-index: 10;
-padding: 25px 40px;
-display: flex;
-justify-content: space-between;
-align-items: center;
+.scanlines {
+position: fixed; inset: 0; z-index: 1000; pointer-events: none; display: none;
+background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+background-size: 100% 3px, 3px 100%;
 }
+
+/* --- UI COMPONENTS --- */
+.top-nav { position: relative; z-index: 10; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; }
 
 .search-bar {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,255,255,0.1);
-border-radius: 100px;
-padding: 10px 25px;
-display: flex;
-align-items: center;
-gap: 12px;
-width: 320px;
-backdrop-filter: blur(10px);
-transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+border-radius: 100px; padding: 10px 25px; display: flex; align-items: center; gap: 12px; width: 300px;
+backdrop-filter: blur(10px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+.search-bar:focus-within { width: 420px; border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+.search-bar input { background: none; border: none; color: white; width: 100%; font-size: 14px; }
 
-.search-bar:focus-within { width: 450px; border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
-.search-bar input { background: none; border: none; color: white; outline: none; width: 100%; font-size: 14px; }
+main { flex: 1; display: flex; justify-content: center; align-items: center; z-index: 1; overflow-y: auto; padding: 40px 0; }
 
-/* --- GRID --- */
-main { flex: 1; display: flex; justify-content: center; align-items: center; z-index: 1; overflow-y: auto; }
-.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: var(--gap); padding: 40px; }
+.grid {
+display: grid;
+grid-template-columns: repeat(var(--grid-cols), var(--box-size));
+gap: var(--gap);
+padding: 20px;
+}
 
 .box {
-position: relative;
-width: var(--box-size); height: var(--box-size);
-background: rgba(255, 255, 255, var(--box-opacity));
-backdrop-filter: blur(var(--blur));
-border: 1px solid rgba(255, 255, 255, 0.1);
-border-radius: var(--box-radius);
-display: flex; justify-content: center; align-items: center;
-text-decoration: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-overflow: hidden;
+position: relative; width: var(--box-size); height: var(--box-size);
+background: rgba(var(--box-color-rgb), var(--box-opacity)); backdrop-filter: blur(var(--blur));
+border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--box-radius);
+display: flex; justify-content: center; align-items: center; text-decoration: none;
+transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d;
 }
-
-.box:hover {
-background: rgba(255, 255, 255, 0.1);
-border-color: var(--accent);
-box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--accent-glow);
-transform: translateY(-5px);
-}
-
-.box span {
-color: white; font-size: 10px; font-weight: 600; text-transform: uppercase;
-letter-spacing: 2px; opacity: var(--text-opacity); transition: 0.3s;
-text-align: center; padding: 10px;
-}
-.box:hover span { opacity: 1; }
+.box:hover { background: rgba(var(--box-color-rgb), 0.1); border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+.box span { color: white; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; opacity: var(--text-opacity); transition: 0.3s; pointer-events: none; text-align: center; }
+.box:hover span { opacity: 1; transform: translateZ(20px); }
 
 /* --- UPDATE BOX --- */
-#updateBox {
-position: fixed;
-bottom: 30px; left: 30px;
-width: 280px;
-background: rgba(255, 255, 255, 0.03);
-backdrop-filter: blur(20px);
-border: 1px solid rgba(255, 255, 255, 0.1);
-border-left: 3px solid var(--accent);
-border-radius: 12px;
-padding: 20px;
-z-index: 50;
-transform: translateX(-120%);
-transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+.update-card {
+position: fixed; bottom: 30px; left: 30px; width: 280px;
+background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(20px);
+border: 1px solid rgba(255, 255, 255, 0.1); border-left: 3px solid var(--accent);
+border-radius: 12px; padding: 20px; z-index: 100;
+transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
+.update-card.hidden { transform: translateX(-150%); opacity: 0; }
+.update-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 10px; font-weight: 600; color: var(--accent); }
+.update-content p { margin: 5px 0; font-size: 11px; color: rgba(255,255,255,0.7); line-height: 1.4; }
 
-#updateBox.visible { transform: translateX(0); }
-#updateBox h5 { margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; color: var(--accent); letter-spacing: 1px; }
-#updateBox p { margin: 0; font-size: 12px; line-height: 1.6; opacity: 0.7; }
-.close-update { position: absolute; top: 10px; right: 10px; font-size: 12px; cursor: pointer; opacity: 0.5; }
-
-/* --- SIDEBAR --- */
+/* --- SIDEBAR & CONTROLS --- */
 .sidebar {
-position: fixed; top: 0; right: -420px; width: 380px; height: 100%;
-background: rgba(8, 8, 8, 0.98); backdrop-filter: blur(50px);
-z-index: 2000; padding: 40px; box-sizing: border-box;
-transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-border-left: 1px solid rgba(255,255,255,0.05);
-overflow-y: auto;
+position: fixed; top: 0; right: -400px; width: 380px; height: 100%;
+background: rgba(5, 5, 5, 0.98); backdrop-filter: blur(40px);
+z-index: 2000; padding: 40px; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+border-left: 1px solid rgba(255,255,255,0.05); overflow-y: auto;
 }
 .sidebar.open { right: 0; }
+.control-group { margin-bottom: 25px; }
+.control-group h4 { font-size: 10px; color: var(--accent); text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 15px; }
+.row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 12px; }
 
-.control-group { margin-bottom: 35px; }
-.control-group h4 {
-font-size: 11px; color: var(--accent); text-transform: uppercase;
-letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
-padding-bottom: 8px;
-}
+input[type="range"] { -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 2px; width: 100px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; }
+input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; outline: none; }
 
-.row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; }
-
-/* --- INPUTS --- */
-input[type="text"], input[type="url"] {
-background: rgba(255,255,255,0.05); border: 1px solid #333;
-color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; outline: none; width: 60%;
-}
-
-button.action-btn {
-width: 100%; padding: 12px; background: var(--accent); border: none;
-border-radius: 6px; color: black; font-weight: 600; cursor: pointer;
-margin-top: 10px; transition: 0.3s;
-}
-
-#cursor {
-position: fixed; width: 10px; height: 10px; background: var(--accent);
-border-radius: 50%; pointer-events: none; z-index: 9999;
-box-shadow: 0 0 15px var(--accent); transition: transform 0.08s ease-out;
-}
+#cursor { position: fixed; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 15px var(--accent); transition: transform 0.08s ease-out; }
 </style>
 </head>
 <body>
 
 <div id="cursor"></div>
+<div id="scanlineOverlay" class="scanlines"></div>
 <canvas id="particleCanvas"></canvas>
 
-<div id="updateBox">
-<i class="fas fa-times close-update" onclick="toggleUpdateBox(false)"></i>
-<h5>v3.2 Update Log</h5>
-<p>• Added Stealth Mode Pro<br>• Custom Link Engine Active<br>• Tab Cloaker & Icon Swap<br>• Panic Key (Esc) Enabled</p>
+<div id="updateBox" class="update-card">
+<div class="update-header">
+<span><i class="fas fa-microchip"></i> SYSTEM UPDATE v6.0</span>
+<i class="fas fa-times close-btn" onclick="dismissUpdate()" style="cursor:pointer;"></i>
+</div>
+<div class="update-content">
+<p>• <b>Battery Engine:</b> Real-time monitoring.</p>
+<p>• <b>Chroma Wheel:</b> Multi-point color selection.</p>
+<p>• <b>Temporal:</b> 12H AM/PM Clock Fix.</p>
+</div>
 </div>
 
 <nav class="top-nav">
-<div class="search-bar">
-<i class="fas fa-search" style="opacity:0.5;"></i>
-<input type="text" id="searchInput" placeholder="Search Filter...">
-</div>
-
-<div style="display:flex; gap:30px; align-items:center;">
-<div id="clock" style="font-weight: 600; opacity: 0.7; font-family: monospace;">00:00:00</div>
-<button onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:22px; cursor:pointer;"><i class="fas fa-bars-staggered"></i></button>
+<div class="search-bar"><i class="fas fa-search" style="opacity:0.3"></i><input type="text" id="searchInput" placeholder="Search Links..."></div>
+<div style="display:flex; gap:25px; align-items:center;">
+<div id="batteryDisplay" style="font-family: monospace; font-size: 12px; color: var(--accent); opacity: 0.8;">--%</div>
+<div id="clock" style="font-family: monospace; opacity:0.6;">00:00:00 AM</div>
+<i class="fas fa-sliders" onclick="toggleSidebar()" style="cursor:pointer; font-size: 20px;"></i>
 </div>
 </nav>
 
-<main>
-<div class="grid" id="grid"></div>
-</main>
+<main><div class="grid" id="grid"></div></main>
 
 <aside class="sidebar" id="sidebar">
-<h2 style="font-weight:300; margin-bottom:40px;">Phantom Suite</h2>
+<h2 style="font-weight:300; margin-bottom:40px;">System Config</h2>
+
+<div class="control-group">
+<h4>Deception</h4>
+<div class="row"><label>Invisible Names</label><input type="checkbox" id="stealthToggle" checked onchange="updateStealth(this.checked)"></div>
+<div class="row"><label>Tab Name</label><input type="text" id="tabInput" placeholder="Google" style="background:rgba(255,255,255,0.05); border:1px solid #333; color:white; padding:4px;" oninput="updateTabTitle(this.value)"></div>
+<div class="row"><label>Favicon</label><input type="file" accept="image/*" onchange="updateFavicon(this)" style="font-size:10px; width:120px;"></div>
+</div>
 
 <div class="control-group">
 <h4>Interface</h4>
-<div class="row">
-<label>Stealth Names</label>
-<input type="checkbox" id="stealthMode" checked onchange="toggleStealth(this.checked)">
-</div>
-<div class="row">
-<label>Show Update Box</label>
-<input type="checkbox" id="updateToggle" checked onchange="toggleUpdateBox(this.checked)">
-</div>
+<div class="row"><label>Accent Color</label><input type="color" id="accentPicker" onchange="applyTheme(this.value)"></div>
+<div class="row"><label>Box Surface</label><input type="color" id="boxColorPicker" value="#ffffff" onchange="updateBoxColor(this.value)"></div>
+<div class="row"><label>Glass Strength</label><input type="range" min="0" max="20" value="4" oninput="updateOpacity(this.value)"></div>
+<div class="row"><label>Blur</label><input type="range" min="0" max="40" value="15" oninput="updateBlur(this.value)"></div>
 </div>
 
 <div class="control-group">
-<h4>Quick Themes</h4>
-<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-<div style="height:40px; background:#00f2ff; cursor:pointer; border-radius:4px;" onclick="applyTheme('#00f2ff', '#030303')"></div>
-<div style="height:40px; background:#ff2d55; cursor:pointer; border-radius:4px;" onclick="applyTheme('#ff2d55', '#050102')"></div>
-<div style="height:40px; background:#00ff88; cursor:pointer; border-radius:4px;" onclick="applyTheme('#00ff88', '#010502')"></div>
-</div>
+<h4>Engine</h4>
+<div class="row"><label>Scanlines</label><input type="checkbox" id="scanlineToggle" onchange="toggleScanlines(this.checked)"></div>
+<div class="row"><label>3D Tilt</label><input type="checkbox" id="tiltToggle" checked></div>
+<div class="row"><label>Particles</label><input type="range" id="partDensity" min="0" max="200" value="80" onchange="initParticles(this.value)"></div>
 </div>
 
-<div class="control-group">
-<h4>Cloaking</h4>
-<div class="row">
-<label>Tab Text</label>
-<input type="text" placeholder="Google" oninput="changeTabTitle(this.value)">
-</div>
-<div class="row" style="flex-direction:column; align-items:flex-start;">
-<label>Tab Icon</label>
-<input type="file" accept="image/*" onchange="changeTabIcon(this)" style="margin-top:10px; width:100%;">
-</div>
-</div>
-
-<button onclick="resetSystem()" style="width:100%; padding:10px; background:none; border:1px solid #ff4444; color:#ff4444; cursor:pointer; margin-top:10px; border-radius:6px;">Reset All</button>
+<button onclick="resetSystem()" style="width:100%; padding:12px; background:none; border:1px solid #ff4444; color:#ff4444; cursor:pointer; border-radius:8px; margin-top:20px;">Factory Reset</button>
 </aside>
 
 <script>
-let userLinks = JSON.parse(localStorage.getItem('nexora_user_links')) || [
-{ name: "Nexora", url: "#" }, { name: "Luminal", url: "#" },
-{ name: "Holy Tuna", url: "#" }, { name: "Movies", url: "#" }
+const links = [
+{ name: "Nexora", url: "https://mathematicss.global.ssl.fastly.net" },
+{ name: "Luminal OS", url: "https://sciencea.global.ssl.fastly.net" },
+{ name: "Hideout", url: "https://artsuplies.global.ssl.fastly.net" },
+{ name: "Holy Tuna", url: "https://fishingsuplies.global.ssl.fastly.net" },
+{ name: "Noah Hub", url: "https://memeresetaintgonnawork.global.ssl.fastly.net" },
+{ name: "Velara", url: "https://t2026soon.global.ssl.fastly.net" },
+{ name: "Strongdog", url: "https://spanishtranslator.global.ssl.fastly.net" },
+{ name: "Movies", url: "https://mrbeastisrich.global.ssl.fastly.net" },
+{ name: "Petezah", url: "https://AAbattery.global.ssl.fastly.net" },
+{ name: "Roblox", url: "https://our-ddddd.global.ssl.fastly.net" },
+{ name: "Froggie", url: "https://froggie.global.ssl.fastly.net" },
+{ name: "Interstellar", url: "https://interstellar.global.ssl.fastly.net" },
+{ name: "Utopia", url: "https://utopia.global.ssl.fastly.net" },
+{ name: "Shadow", url: "https://shadow.global.ssl.fastly.net" },
+{ name: "Nebula", url: "https://nebula.global.ssl.fastly.net" },
+{ name: "Zenith", url: "https://zenith.global.ssl.fastly.net" }
 ];
 
 window.onload = () => {
-renderGrid();
+renderGrid(links);
 initClock();
+initBattery();
 initParticles();
 initCursor();
 loadSettings();
-setTimeout(() => { if(document.getElementById('updateToggle').checked) toggleUpdateBox(true); }, 800);
 };
 
-function renderGrid(filter = "") {
+function renderGrid(data) {
 const grid = document.getElementById('grid');
 grid.innerHTML = '';
-userLinks.filter(l => l.name.toLowerCase().includes(filter.toLowerCase())).forEach(item => {
+data.forEach(item => {
 const box = document.createElement('a');
-box.className = 'box'; box.href = item.url;
+box.className = 'box'; box.href = item.url; box.target = "_blank";
 box.innerHTML = `<span>${item.name}</span>`;
+box.onmousemove = (e) => {
+if(!document.getElementById('tiltToggle').checked) return;
+const rect = box.getBoundingClientRect();
+const x = (e.clientX - rect.left - rect.width/2) / 8;
+const y = (e.clientY - rect.top - rect.height/2) / 8;
+box.style.transform = `perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg) scale(1.05)`;
+};
+box.onmouseleave = () => box.style.transform = `scale(1)`;
 grid.appendChild(box);
 });
 }
 
-function toggleUpdateBox(show) {
-document.getElementById('updateBox').classList.toggle('visible', show);
-saveSetting('showUpdates', show);
+// --- ENGINES ---
+function initClock() {
+setInterval(() => {
+document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {
+hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+});
+}, 1000);
 }
 
-function applyTheme(accent, bg) {
-document.documentElement.style.setProperty('--accent', accent);
-document.documentElement.style.setProperty('--accent-glow', accent + '44');
-document.documentElement.style.setProperty('--bg-color', bg);
-saveSetting('theme', {accent, bg});
+function initBattery() {
+if ('getBattery' in navigator) {
+navigator.getBattery().then(battery => {
+const update = () => {
+const level = Math.round(battery.level * 100);
+document.getElementById('batteryDisplay').innerText = (battery.charging ? "⚡ " : "") + level + "%";
+};
+update();
+battery.onlevelchange = update;
+battery.onchargingchange = update;
+});
+}
 }
 
-function toggleStealth(isStealth) {
-document.documentElement.style.setProperty('--text-opacity', isStealth ? '0' : '1');
-saveSetting('stealth', isStealth);
+function applyTheme(color) {
+document.documentElement.style.setProperty('--accent', color);
+document.documentElement.style.setProperty('--accent-glow', color + '44');
+save('accent', color);
 }
 
-function changeTabTitle(val) { document.title = val || "Nexora Hub"; saveSetting('tabTitle', val); }
+function updateBoxColor(color) {
+const r = parseInt(color.slice(1, 3), 16), g = parseInt(color.slice(3, 5), 16), b = parseInt(color.slice(5, 7), 16);
+document.documentElement.style.setProperty('--box-color-rgb', `${r}, ${g}, ${b}`);
+save('boxColor', color);
+}
 
-function changeTabIcon(input) {
+function updateOpacity(val) { document.documentElement.style.setProperty('--box-opacity', val/100); save('opacity', val); }
+function updateStealth(val) { document.documentElement.style.setProperty('--text-opacity', val ? '0' : '1'); save('stealth', val); }
+function updateTabTitle(val) { document.title = val || "Nexora Hub"; save('tabTitle', val); }
+function toggleScanlines(val) { document.getElementById('scanlineOverlay').style.display = val ? 'block' : 'none'; save('scanlines', val); }
+function updateBlur(val) { document.documentElement.style.setProperty('--blur', val + 'px'); save('blur', val); }
+function dismissUpdate() { document.getElementById('updateBox').classList.add('hidden'); }
+
+function updateFavicon(input) {
 if (input.files && input.files[0]) {
 const reader = new FileReader();
-reader.onload = (e) => {
-document.getElementById('tab-icon').href = e.target.result;
-saveSetting('tabIcon', e.target.result);
-};
+reader.onload = (e) => { document.getElementById('tab-icon').href = e.target.result; save('favicon', e.target.result); };
 reader.readAsDataURL(input.files[0]);
 }
 }
 
 window.onkeydown = (e) => { if (e.key === "Escape") window.location.replace("https://google.com"); };
-
-function saveSetting(key, val) { localStorage.setItem('nexora_v3_' + key, JSON.stringify(val)); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function save(k, v) { localStorage.setItem('nx_v6_'+k, JSON.stringify(v)); }
 
 function loadSettings() {
-const theme = JSON.parse(localStorage.getItem('nexora_v3_theme'));
-if(theme) applyTheme(theme.accent, theme.bg);
-
-const title = JSON.parse(localStorage.getItem('nexora_v3_tabTitle'));
-if(title) changeTabTitle(title);
-
-const icon = JSON.parse(localStorage.getItem('nexora_v3_tabIcon'));
-if(icon) document.getElementById('tab-icon').href = icon;
-
-const updates = JSON.parse(localStorage.getItem('nexora_v3_showUpdates'));
-if(updates !== null) document.getElementById('updateToggle').checked = updates;
+const s = (k) => JSON.parse(localStorage.getItem('nx_v6_'+k));
+if(s('accent')) { applyTheme(s('accent')); document.getElementById('accentPicker').value = s('accent'); }
+if(s('boxColor')) { updateBoxColor(s('boxColor')); document.getElementById('boxColorPicker').value = s('boxColor'); }
+if(s('stealth') !== null) { document.getElementById('stealthToggle').checked = s('stealth'); updateStealth(s('stealth')); }
+if(s('tabTitle')) { updateTabTitle(s('tabTitle')); document.getElementById('tabInput').value = s('tabTitle'); }
+if(s('scanlines')) { document.getElementById('scanlineToggle').checked = true; toggleScanlines(true); }
+if(s('blur')) updateBlur(s('blur'));
+if(s('opacity')) updateOpacity(s('opacity'));
+if(s('favicon')) document.getElementById('tab-icon').href = s('favicon');
 }
 
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-function initClock() { setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB'); }, 1000); }
-function initCursor() { const cur = document.getElementById('cursor'); window.onmousemove = e => { cur.style.transform = `translate(${e.clientX - 5}px, ${e.clientY - 5}px)`; }; }
+function initCursor() { const cur = document.getElementById('cursor'); window.onmousemove = e => { cur.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`; }; }
 function resetSystem() { localStorage.clear(); location.reload(); }
 
-function initParticles() {
+function initParticles(count = 80) {
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth; canvas.height = window.innerHeight;
 let pts = [];
-for(let i=0; i<100; i++) pts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5});
+for(let i=0; i<count; i++) pts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5});
 function anim() {
 ctx.clearRect(0,0,canvas.width,canvas.height);
 ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
 pts.forEach(p => {
 p.x += p.vx; p.y += p.vy;
 if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1;
-ctx.globalAlpha = 0.15; ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, Math.PI*2); ctx.fill();
+ctx.globalAlpha = 0.15; ctx.beginPath(); ctx.arc(p.x, p.y, 1.2, 0, Math.PI*2); ctx.fill();
 });
 requestAnimationFrame(anim);
 }
 anim();
 }
 
-document.getElementById('searchInput').oninput = (e) => renderGrid(e.target.value);
+document.getElementById('searchInput').oninput = (e) => {
+renderGrid(links.filter(l => l.name.toLowerCase().includes(e.target.value.toLowerCase())));
+};
 </script>
 </body>
 </html>
