@@ -37,29 +37,29 @@
 
   .grid-container {
     display:grid;
-    grid-template-columns: repeat(4, 130px);
-    grid-template-rows: repeat(4, 130px);
-    gap:15px;
+    grid-template-columns: repeat(4, 140px);
+    grid-template-rows: repeat(4, 140px);
+    gap:18px;
   }
 
   .grid-item {
     display:flex;
     justify-content:center;
     align-items:center;
-    background: rgba(0,0,0,0.3); /* more transparent */
-    color: white;
-    font-weight:600;
-    font-size:14px;
+    background: rgba(0,0,0,0.25); /* more subtle */
+    color: #fff;
+    font-weight:500;
+    font-size:15px;
     text-align:center;
     text-decoration:none;
-    border-radius:15px;
-    box-shadow:0 0 12px rgba(255,255,255,0.05);
+    border-radius:12px;
+    box-shadow:0 0 8px rgba(255,255,255,0.05);
     backdrop-filter: blur(6px);
     transition: all 0.3s ease;
     padding:8px;
     cursor:pointer;
     word-wrap: break-word;
-    animation: rainbowGlow 6s linear infinite;
+    animation: rainbowGlow 8s linear infinite;
   }
 
   .grid-item:hover {
@@ -67,30 +67,30 @@
   }
 
   .grid-item:active {
-    box-shadow:0 0 20px 5px white;
+    box-shadow:0 0 18px 4px white;
     transform: scale(0.95);
   }
 
   @keyframes rainbowGlow {
-    0% { box-shadow: 0 0 12px 2px #ff0000; }
-    16% { box-shadow: 0 0 12px 2px #ff7f00; }
-    33% { box-shadow: 0 0 12px 2px #ffff00; }
-    50% { box-shadow: 0 0 12px 2px #00ff00; }
-    66% { box-shadow: 0 0 12px 2px #0000ff; }
-    83% { box-shadow: 0 0 12px 2px #4b0082; }
-    100% { box-shadow: 0 0 12px 2px #8f00ff; }
+    0% { box-shadow: 0 0 8px 1px #ff0000; }
+    16% { box-shadow: 0 0 8px 1px #ff7f00; }
+    33% { box-shadow: 0 0 8px 1px #ffff00; }
+    50% { box-shadow: 0 0 8px 1px #00ff00; }
+    66% { box-shadow: 0 0 8px 1px #0000ff; }
+    83% { box-shadow: 0 0 8px 1px #4b0082; }
+    100% { box-shadow: 0 0 8px 1px #8f00ff; }
   }
 
   @media (max-width:850px) {
     .grid-container {
-      grid-template-columns: repeat(2, 150px);
-      grid-template-rows: repeat(8, 150px);
+      grid-template-columns: repeat(2, 160px);
+      grid-template-rows: repeat(8, 160px);
     }
   }
   @media (max-width:500px) {
     .grid-container {
-      grid-template-columns: repeat(1, 130px);
-      grid-template-rows: repeat(16, 130px);
+      grid-template-columns: repeat(1, 140px);
+      grid-template-rows: repeat(16, 140px);
     }
   }
 </style>
@@ -138,9 +138,9 @@ class Particle{
   constructor(){
     this.x = Math.random()*canvas.width;
     this.y = Math.random()*canvas.height;
-    this.size = Math.random()*2+1;
-    this.speedX = (Math.random()-0.5)*1;
-    this.speedY = (Math.random()-0.5)*1;
+    this.size = Math.random()*2+0.5;
+    this.speedX = (Math.random()-0.5)*0.5;
+    this.speedY = (Math.random()-0.5)*0.5;
   }
   update(){
     this.x+=this.speedX;
@@ -158,7 +158,7 @@ class Particle{
 
 function init(){
   particlesArray=[];
-  const numParticles=Math.floor((canvas.width*canvas.height)/12000);
+  const numParticles=Math.floor((canvas.width*canvas.height)/15000);
   for(let i=0;i<numParticles;i++){
     particlesArray.push(new Particle());
   }
