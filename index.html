@@ -5,65 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Project Grid</title>
   <style>
+    /* Reset & body */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
+      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      background-color: #1e1e1e;
-      margin: 0;
-      font-family: Arial, sans-serif;
     }
 
+    /* Particle canvas full screen */
+    canvas#particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    /* Grid container */
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(4, 150px);
-      grid-template-rows: repeat(4, 150px);
-      gap: 0; /* boxes touch each other */
+      grid-template-columns: repeat(4, 120px);
+      grid-template-rows: repeat(4, 120px);
+      gap: 15px;
+      z-index: 1;
+      position: relative;
     }
 
+    /* Frosted glass boxes */
     .grid-item {
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #3498db;
+      background: rgba(0,0,0,0.4); /* transparent black */
       color: white;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 14px;
-      border: 2px solid #1e1e1e; /* optional slight separation */
-      transition: transform 0.2s, background 0.2s;
+      font-weight: 600;
       text-align: center;
+      text-decoration: none;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
       padding: 10px;
+      cursor: pointer;
     }
 
+    /* Click / active glow */
+    .grid-item:active {
+      box-shadow: 0 0 15px 5px white;
+      transform: scale(0.95);
+    }
+
+    /* Hover effect */
     .grid-item:hover {
       transform: scale(1.05);
-      background: #2980b9;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .grid-container {
+        grid-template-columns: repeat(2, 120px);
+        grid-template-rows: repeat(8, 120px);
+      }
     }
   </style>
 </head>
 <body>
+  <canvas id="particles"></canvas>
+
   <div class="grid-container">
-    <a href="https://mathematicss.global.ssl.fastly.net" target="_blank" class="grid-item">Nexora</a>
-    <a href="https://sciencea.global.ssl.fastly.net" target="_blank" class="grid-item">Luminal OS</a>
-    <a href="https://artsuplies.global.ssl.fastly.net" target="_blank" class="grid-item">Hideout</a>
-    <a href="https://fishingsuplies.global.ssl.fastly.net" target="_blank" class="grid-item">Holy Tuna</a>
+    <a href="#" class="grid-item">Portfolio</a>
+    <a href="#" class="grid-item">Mini Games</a>
+    <a href="#" class="grid-item">Fun Tools</a>
+    <a href="#" class="grid-item">Tutorials</a>
 
-    <a href="https://memeresetaintgonnawork.global.ssl.fastly.net" target="_blank" class="grid-item">Noah Hub</a>
-    <a href="https://t2026soon.global.ssl.fastly.net" target="_blank" class="grid-item">Velara</a>
-    <a href="https://spanishtranslator.global.ssl.fastly.net" target="_blank" class="grid-item">Strongdog XP</a>
-    <a href="https://mrbeastisrich.global.ssl.fastly.net" target="_blank" class="grid-item">Movie Site</a>
+    <a href="#" class="grid-item">Memes</a>
+    <a href="#" class="grid-item">Blog</a>
+    <a href="#" class="grid-item">Music</a>
+    <a href="#" class="grid-item">Animations</a>
 
-    <a href="https://AAbattery.global.ssl.fastly.net" target="_blank" class="grid-item">Petezah Game</a>
-    <a href="https://milkyway.global.ssl.fastly.net" target="_blank" class="grid-item">Space</a>
-    <a href="https://remeberthis.global.ssl.fastly.net" target="_blank" class="grid-item">BigTallSmall</a>
-    <a href="https://bestone.global.ssl.fastly.net" target="_blank" class="grid-item">Froggie Arcade</a>
+    <a href="#" class="grid-item">Science</a>
+    <a href="#" class="grid-item">Art</a>
+    <a href="#" class="grid-item">Challenges</a>
+    <a href="#" class="grid-item">Links</a>
 
-    <a href="https://imaginethename.global.ssl.fastly.net" target="_blank" class="grid-item">Z-Kit</a>
-    <a href="https://santaisreal.global.ssl.fastly.net" target="_blank" class="grid-item">Refind Stuff</a>
-    <a href="https://goodwinterbreak.global.ssl.fastly.net" target="_blank" class="grid-item">Bloxcraft UBG</a>
-    <a href="https://our-ddddd.global.ssl.fastly.net" target="_blank" class="grid-item">Roblox</a>
+    <a href="#" class="grid-item">Wiki</a>
+    <a href="#" class="grid-item">Stories</a>
+    <a href="#" class="grid-item">Fan Page</a>
+    <a href="#" class="grid-item">Random</a>
   </div>
+
+  <script>
+    // Particles JS
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particlesArray = [];
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      init();
+    });
+
+    class Particle {
+      constructor(){
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = (Math.random() - 0.5) * 1;
+        this.speedY = (Math.random() - 0.5) * 1;
+      }
+      update(){
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if(this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if(this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      }
+      draw(){
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function init(){
+      particlesArray = [];
+      const numParticles = Math.floor((canvas.width * canvas.height)/10000);
+      for(let i=0; i<numParticles; i++){
+        particlesArray.push(new Particle());
+      }
+    }
+
+    function animate(){
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particlesArray.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    init();
+    animate();
+  </script>
 </body>
 </html>
