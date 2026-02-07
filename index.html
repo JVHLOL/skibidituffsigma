@@ -5,37 +5,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title></title> <!-- Invisible title -->
 <style>
-  body {
+  html, body {
     margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #111; /* Dark background */
+    padding: 0;
+    height: 100%;
+    background: #0a0a0a;
     font-family: Arial, sans-serif;
-    color: #fff;
+    overflow: hidden; /* removes scrollbars */
   }
 
   .grid-container {
     display: grid;
-    grid-template-columns: repeat(4, 220px); /* slightly bigger boxes */
-    grid-template-rows: repeat(4, 120px);
-    gap: 0px; /* boxes touch each other */
+    grid-template-columns: repeat(4, 250px);
+    grid-template-rows: repeat(4, 150px);
+    gap: 0;
+    height: 100%;
+    width: 100%;
     justify-content: center;
     align-items: center;
   }
 
   .grid-item {
-    background: rgba(255, 255, 255, 0.05); /* very clear/translucent */
-    border: 1px solid rgba(255,255,255,0.2); /* subtle border */
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    text-align: center;
-    transition: transform 0.2s, background 0.2s;
-    font-size: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  /* Neon pulsing border */
+  .grid-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid #0ff;
+    opacity: 0.7;
+    box-shadow: 0 0 15px #0ff, 0 0 30px #0ff, 0 0 60px #0ff;
+    animation: pulse 2s infinite alternate;
+    pointer-events: none;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 15px #0ff, 0 0 30px #0ff, 0 0 60px #0ff; }
+    100% { box-shadow: 0 0 30px #0ff, 0 0 60px #0ff, 0 0 90px #0ff; }
   }
 
   .grid-item a {
@@ -46,16 +64,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1;
   }
 
   .grid-item:hover {
     transform: scale(1.05);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 255, 255, 0.1);
   }
 </style>
 </head>
 <body>
-
 <div class="grid-container">
   <div class="grid-item"><a href="https://mathematicss.global.ssl.fastly.net">Nexora</a></div>
   <div class="grid-item"><a href="https://sciencea.global.ssl.fastly.net">Luminal OS</a></div>
@@ -77,6 +95,5 @@
   <div class="grid-item"><a href="https://goodwinterbreak.global.ssl.fastly.net">Bloxcraft UBG</a></div>
   <div class="grid-item"><a href="https://our-ddddd.global.ssl.fastly.net/">Roblox</a></div>
 </div>
-
 </body>
 </html>
