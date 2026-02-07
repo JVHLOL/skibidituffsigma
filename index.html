@@ -28,7 +28,7 @@
 
 body {
 margin: 0; height: 100vh; background: var(--bg-color);
-background-size: cover; background-position: center;
+background-size: cover; background-position: center; background-attachment: fixed;
 font-family: var(--font-main); color: white;
 overflow: hidden; display: flex; flex-direction: column;
 transition: background 0.5s ease;
@@ -36,22 +36,22 @@ transition: background 0.5s ease;
 
 #particleCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-/* --- UI ELEMENTS --- */
+/* --- UI NAVIGATION --- */
 .top-nav { position: relative; z-index: 10; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; }
 
 .search-bar {
 background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
 border-radius: 100px; padding: 10px 25px; display: flex; align-items: center; gap: 12px; width: 300px;
-backdrop-filter: blur(10px); transition: 0.4s;
+backdrop-filter: blur(10px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .search-bar:focus-within { width: 420px; border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
 .search-bar input { background: none; border: none; color: white; width: 100%; font-size: 14px; cursor: none; }
 
 main { flex: 1; display: flex; justify-content: center; align-items: center; z-index: 1; overflow-y: auto; padding: 40px 0; }
 
-.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: var(--gap); padding: 20px; }
+.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: var(--gap); padding: 20px; transition: 0.5s ease; }
 
-/* --- BOXES --- */
+/* --- BOX STYLES & ANIMATIONS --- */
 .box {
 position: relative; width: var(--box-size); height: var(--box-size);
 background: rgba(var(--box-color-rgb), var(--box-opacity)); backdrop-filter: blur(var(--blur));
@@ -59,29 +59,34 @@ border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--box-radius);
 display: flex; justify-content: center; align-items: center; text-decoration: none;
 transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d;
 }
+
 .box.anim-pulse:hover { animation: pulse 1.5s infinite; border-color: var(--accent); }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--accent-glow); } 70% { box-shadow: 0 0 0 15px rgba(0,0,0,0); } 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
-.box.anim-float:hover { transform: translateY(-10px); border-color: var(--accent); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
+
+.box.anim-float:hover { transform: translateY(-12px); border-color: var(--accent); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
+
 .box span { color: white; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; opacity: var(--text-opacity); transition: 0.3s; pointer-events: none; text-align: center; }
 .box:hover span { opacity: 1; }
 
 /* --- SIDEBAR --- */
 .sidebar {
 position: fixed; top: 0; right: -400px; width: 380px; height: 100%;
-background: rgba(5, 5, 5, 0.96); backdrop-filter: blur(40px);
-z-index: 2000; padding: 40px; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+background: rgba(5, 5, 5, 0.97); backdrop-filter: blur(45px);
+z-index: 2000; padding: 40px; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 border-left: 1px solid rgba(255,255,255,0.05); overflow-y: auto;
 }
 .sidebar.open { right: 0; }
-.close-sidebar { position: absolute; top: 25px; right: 25px; font-size: 20px; cursor: pointer; opacity: 0.5; }
+.close-sidebar { position: absolute; top: 25px; right: 25px; font-size: 20px; cursor: pointer; opacity: 0.5; transition: 0.3s; }
+.close-sidebar:hover { opacity: 1; color: var(--accent); }
+
 .control-group { margin-bottom: 25px; }
-.control-group h4 { font-size: 10px; color: var(--accent); text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 15px; }
+.control-group h4 { font-size: 10px; color: var(--accent); text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 1px; }
 .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 12px; }
 
-select, input[type="text"] { background: rgba(255,255,255,0.05); border: 1px solid #333; color: white; padding: 5px; border-radius: 4px; font-size: 11px; }
+select, input[type="text"] { background: rgba(255,255,255,0.05); border: 1px solid #333; color: white; padding: 6px; border-radius: 4px; font-size: 11px; width: 120px; }
 input[type="range"] { -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 2px; width: 100px; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 12px; background: var(--accent); border-radius: 50%; }
-input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; }
+input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; outline: none; }
 
 #cursor { position: fixed; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 15px var(--accent); transition: transform 0.08s ease-out; }
 </style>
@@ -94,9 +99,9 @@ input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; 
 <nav class="top-nav">
 <div class="search-bar"><i class="fas fa-search" style="opacity:0.3"></i><input type="text" id="searchInput" placeholder="System Search..."></div>
 <div style="display:flex; gap:25px; align-items:center;">
-<div id="batteryDisplay" style="font-family: monospace; font-size: 11px; color: var(--accent);">--%</div>
-<div id="clock" style="font-family: monospace; opacity:0.6; font-size: 12px;">00:00:00 AM</div>
-<i class="fas fa-sliders" onclick="toggleSidebar(event)" style="cursor:pointer; font-size: 20px;"></i>
+<div id="batteryDisplay" style="font-family: monospace; font-size: 11px; color: var(--accent); border: 1px solid var(--accent); padding: 2px 6px; border-radius: 4px;">--%</div>
+<div id="clock" style="font-family: monospace; opacity:0.6; font-size: 12px; letter-spacing: 1px;">00:00:00 AM</div>
+<i class="fas fa-bars-staggered" onclick="toggleSidebar(event)" style="cursor:pointer; font-size: 20px; color: var(--accent);"></i>
 </div>
 </nav>
 
@@ -104,47 +109,48 @@ input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; 
 
 <aside class="sidebar" id="sidebar">
 <i class="fas fa-times close-sidebar" onclick="toggleSidebar(event)"></i>
-<h2 style="font-weight:300; margin-bottom:40px;">System Config</h2>
+<h2 style="font-weight:300; margin-bottom:40px; letter-spacing: 2px;">SYSTEM CONFIG</h2>
 
 <div class="control-group">
-<h4>Wallpapers</h4>
-<div class="row"><label>Custom BG</label><input type="file" accept="image/*" onchange="updateBackground(this)" style="font-size:10px; width:120px;"></div>
-<div class="row"><label>Accent</label><input type="color" id="accentPicker" onchange="applyTheme(this.value)"></div>
+<h4>Environment</h4>
+<div class="row"><label>Wallpaper</label><input type="file" accept="image/*" onchange="updateBackground(this)" style="font-size:10px; width:120px;"></div>
+<div class="row"><label>Accent Color</label><input type="color" id="accentPicker" onchange="applyTheme(this.value)"></div>
+<div class="row"><label>Font Engine</label>
+<select id="fontSelect" onchange="updateFont(this.value)">
+<option value="'Plus Jakarta Sans'">Jakarta Elite</option>
+<option value="'Orbitron'">Cyber Orbitron</option>
+<option value="'JetBrains Mono'">Dev Mono</option>
+</select>
+</div>
 </div>
 
 <div class="control-group">
-<h4>Engine (Particles)</h4>
+<h4>Particle Engine</h4>
 <div class="row"><label>Particle Color</label><input type="color" id="partPicker" onchange="updatePartColor(this.value)"></div>
-<div class="row"><label>Type</label>
+<div class="row"><label>FX Type</label>
 <select id="partType" onchange="initParticles(80, this.value)">
 <option value="dust">Classic Dust</option>
-<option value="lines">Neural Lines</option>
-<option value="snow">Slow Drift</option>
+<option value="lines">Neural Grid</option>
+<option value="snow">Atmospheric</option>
 </select>
 </div>
 <div class="row"><label>Density</label><input type="range" min="0" max="250" value="80" onchange="initParticles(this.value, document.getElementById('partType').value)"></div>
 </div>
 
 <div class="control-group">
-<h4>Grid & Boxes</h4>
-<div class="row"><label>Font</label>
-<select id="fontSelect" onchange="updateFont(this.value)">
-<option value="'Plus Jakarta Sans'">Jakarta</option>
-<option value="'Orbitron'">Orbitron</option>
-<option value="'JetBrains Mono'">Mono</option>
-</select>
-</div>
-<div class="row"><label>Hover FX</label>
+<h4>Grid Matrix</h4>
+<div class="row"><label>Hover Style</label>
 <select id="animSelect" onchange="updateAnim(this.value)">
-<option value="anim-tilt">3D Tilt</option>
-<option value="anim-pulse">Pulse</option>
-<option value="anim-float">Float</option>
+<option value="anim-tilt">3D Tilt Shift</option>
+<option value="anim-pulse">Neon Pulse</option>
+<option value="anim-float">Float Vertical</option>
 </select>
 </div>
-<div class="row"><label>Glass Fill</label><input type="color" id="boxColorPicker" onchange="updateBoxColor(this.value)"></div>
+<div class="row"><label>Glass Fill</label><input type="color" id="boxColorPicker" value="#ffffff" onchange="updateBoxColor(this.value)"></div>
+<div class="row"><label>Transparency</label><input type="range" min="0" max="40" value="4" oninput="updateOpacity(this.value)"></div>
 </div>
 
-<button onclick="resetSystem()" style="width:100%; padding:12px; background:none; border:1px solid #ff4444; color:#ff4444; cursor:pointer; border-radius:8px; margin-top:20px;">Reset Engine</button>
+<button onclick="resetSystem()" style="width:100%; padding:12px; background:none; border:1px solid #ff4444; color:#ff4444; cursor:pointer; border-radius:8px; margin-top:20px; font-size: 11px; letter-spacing: 1px;">WIPE CACHE & RESET</button>
 </aside>
 
 <script>
@@ -188,7 +194,7 @@ grid.appendChild(box);
 });
 }
 
-// --- CORE ENGINES ---
+// --- INTERFACE ENGINES ---
 function toggleSidebar(e) { e.stopPropagation(); document.getElementById('sidebar').classList.toggle('open'); }
 function closeSidebarOutside(e) {
 const sb = document.getElementById('sidebar');
@@ -200,10 +206,12 @@ function updatePartColor(color) { document.documentElement.style.setProperty('--
 function updateFont(val) { document.documentElement.style.setProperty('--font-main', val); save('font', val); }
 function updateAnim(val) { currentAnim = val; renderGrid(links); save('anim', val); }
 function updateOpacity(val) { document.documentElement.style.setProperty('--box-opacity', val/100); save('opacity', val); }
+
 function updateBoxColor(color) {
 const r = parseInt(color.slice(1,3),16), g = parseInt(color.slice(3,5),16), b = parseInt(color.slice(5,7),16);
 document.documentElement.style.setProperty('--box-color-rgb', `${r},${g},${b}`); save('boxCol', color);
 }
+
 function updateBackground(input) {
 if(input.files && input.files[0]) {
 const reader = new FileReader();
@@ -212,6 +220,7 @@ reader.readAsDataURL(input.files[0]);
 }
 }
 
+// --- PARTICLE LOGIC ---
 function initParticles(count = 80, type = 'dust') {
 cancelAnimationFrame(partReq);
 const canvas = document.getElementById('particleCanvas'); const ctx = canvas.getContext('2d');
@@ -225,7 +234,7 @@ ctx.fillStyle = ctx.strokeStyle = getComputedStyle(document.documentElement).get
 pts.forEach((p, i) => {
 p.x += p.vx; p.y += p.vy;
 if(p.x<0||p.x>w) p.vx*=-1; if(p.y<0||p.y>h) p.vy*=-1;
-ctx.globalAlpha = 0.3;
+ctx.globalAlpha = 0.25;
 ctx.beginPath();
 if(type==='lines') {
 pts.slice(i+1).forEach(p2 => {
@@ -234,7 +243,7 @@ if(d<100) { ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); }
 });
 ctx.stroke();
 } else if(type==='snow') {
-p.y += 0.2; if(p.y > h) p.y = 0;
+p.y += 0.3; if(p.y > h) p.y = 0;
 ctx.arc(p.x, p.y, p.r + 1, 0, Math.PI*2); ctx.fill();
 } else {
 ctx.arc(p.x, p.y, 1.2, 0, Math.PI*2); ctx.fill();
@@ -245,17 +254,27 @@ partReq = requestAnimationFrame(anim);
 anim();
 }
 
+// --- SYSTEM UTILS ---
 function initClock() { setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true}); }, 1000); }
 function initBattery() { if(navigator.getBattery) navigator.getBattery().then(b => { const u = () => document.getElementById('batteryDisplay').innerText = (b.charging?"⚡ ":"")+Math.round(b.level*100)+"%"; u(); b.onlevelchange = u; b.onchargingchange = u; }); }
 function initCursor() { const cur = document.getElementById('cursor'); window.onmousemove = e => { cur.style.transform = `translate(${e.clientX-4}px, ${e.clientY-4}px)`; }; }
-function save(k, v) { localStorage.setItem('nx_v8_'+k, JSON.stringify(v)); }
+function save(k, v) { localStorage.setItem('nx_final_v9_'+k, JSON.stringify(v)); }
 function resetSystem() { localStorage.clear(); location.reload(); }
 
 function loadSettings() {
-const s = (k) => JSON.parse(localStorage.getItem('nx_v8_'+k));
+const s = (k) => JSON.parse(localStorage.getItem('nx_final_v9_'+k));
 if(s('accent')) applyTheme(s('accent'));
 if(s('partCol')) { updatePartColor(s('partCol')); document.getElementById('partPicker').value = s('partCol'); }
 if(s('font')) { updateFont(s('font')); document.getElementById('fontSelect').value = s('font'); }
 if(s('bg')) document.body.style.backgroundImage = `url(${s('bg')})`;
 if(s('boxCol')) { updateBoxColor(s('boxCol')); document.getElementById('boxColorPicker').value = s('boxCol'); }
 if(s('anim')) { currentAnim = s('anim'); document.getElementById('animSelect').value = s('anim'); }
+if(s('opacity')) updateOpacity(s('opacity'));
+}
+
+document.getElementById('searchInput').oninput = (e) => {
+renderGrid(links.filter(l => l.name.toLowerCase().includes(e.target.value.toLowerCase())));
+};
+</script>
+</body>
+</html>
