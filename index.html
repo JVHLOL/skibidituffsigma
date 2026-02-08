@@ -3,84 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="tab-title">Nexora | Ultimate Hub</title>
+<title id="tab-title">Nexora | The Everything Hub</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link id="mainFont" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
---accent: #00f2ff; --accent-glow: rgba(0, 242, 255, 0.3);
---bg: #050505; --panel: rgba(255,255,255,0.05);
---blur: 12px; --bloom: 0px; --vignette: 40%;
---box-size: 140px; --grid-cols: 4; --gap: 20px;
---font: 'Plus Jakarta Sans', sans-serif;
+--bg-color: #030303;
+--accent: #00f2ff;
+--part-color: #00f2ff;
+--accent-glow: rgba(0, 242, 255, 0.3);
+--box-color-rgb: 255, 255, 255;
+--box-size: 140px;
+--box-radius: 16px;
+--box-opacity: 0.08;
+--blur: 15px;
+--grid-cols: 4;
+--gap: 20px;
+--bloom: 0px;
+--vignette: 40%;
+--font-main: 'Plus Jakarta Sans', sans-serif;
 }
 
 * { cursor: none !important; box-sizing: border-box; outline: none; }
 body {
-margin: 0; height: 100vh; background: var(--bg); font-family: var(--font);
-color: white; overflow: hidden; display: flex; flex-direction: column;
+margin: 0; height: 100vh; background: var(--bg-color);
 background-size: cover; background-position: center;
+font-family: var(--font-main); color: white; overflow: hidden;
+display: flex; flex-direction: column;
 }
 
-body::before {
+body::after {
 content: ''; position: fixed; inset: 0; pointer-events: none;
-background: radial-gradient(circle, transparent var(--vignette), black 150%); z-index: 2;
+background: radial-gradient(circle, transparent var(--vignette), black 150%);
+z-index: 2;
 }
 
-#particleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; filter: blur(var(--bloom)); opacity: 0.5; }
+#particleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; filter: blur(var(--bloom)); opacity: 0.6; }
 
-/* --- UI OVERLAYS --- */
+/* --- SEARCH OVERLAY (Internal Browser) --- */
 #searchOverlay {
 position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000;
-display: none; flex-direction: column; backdrop-filter: blur(20px);
+display: none; flex-direction: column; backdrop-filter: blur(25px);
 }
+.overlay-header { padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); background: #000; }
 #searchIframe { border: none; flex: 1; width: 100%; background: white; }
 
-/* --- TOP NAV --- */
-.top-nav { position: relative; z-index: 10; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+/* --- UI COMPONENTS --- */
+.top-nav { position: relative; z-index: 10; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; }
+
+.search-container { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.search-tabs { display: flex; gap: 10px; }
+.search-tab { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; opacity: 0.4; transition: 0.3s; padding: 4px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; }
+.search-tab.active { opacity: 1; background: var(--accent); color: black; }
+
 .search-bar {
-background: var(--panel); border: 1px solid rgba(255,255,255,0.1);
-border-radius: 50px; padding: 10px 20px; display: flex; align-items: center; gap: 12px; width: 300px;
-backdrop-filter: blur(10px); transition: 0.3s;
+background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+border-radius: 100px; padding: 10px 25px; display: flex; align-items: center; gap: 12px; width: 320px;
+backdrop-filter: blur(10px); transition: 0.4s;
 }
 .search-bar:focus-within { width: 400px; border-color: var(--accent); }
-.search-bar input { background: none; border: none; color: white; width: 100%; font-size: 13px; cursor: none; }
+.search-bar input { background: none; border: none; color: white; width: 100%; font-size: 14px; cursor: none; }
 
 /* --- MAIN GRID --- */
-main { flex: 1; display: flex; justify-content: center; align-items: center; z-index: 5; overflow-y: auto; padding-bottom: 100px; }
+main { flex: 1; display: flex; justify-content: center; align-items: center; z-index: 3; overflow-y: auto; padding: 100px 0; }
 .grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: var(--gap); padding: 40px; }
+
 .box {
-width: var(--box-size); height: var(--box-size);
-background: var(--panel); backdrop-filter: blur(var(--blur));
-border: 1px solid rgba(255,255,255,0.1); border-radius: 15px;
-display: flex; flex-direction: column; justify-content: center; align-items: center;
-text-decoration: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+position: relative; width: var(--box-size); height: var(--box-size);
+background: rgba(var(--box-color-rgb), var(--box-opacity)); backdrop-filter: blur(var(--blur));
+border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--box-radius);
+display: flex; justify-content: center; align-items: center; text-decoration: none;
+transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.box:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
-.box span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin-top: 8px; }
+.box:hover { border-color: var(--accent); box-shadow: 0 0 30px var(--accent-glow); transform: translateY(-5px); }
+.box span { color: white; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; }
+
+/* --- SPOTIFY DOCK --- */
+.spotify-dock {
+position: fixed; bottom: -110px; left: 50%; transform: translateX(-50%);
+width: 400px; height: 160px; z-index: 1000; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.spotify-dock:hover { bottom: 20px; }
+.spotify-handle { height: 25px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 10px 10px 0 0; display: flex; justify-content: center; align-items: center; font-size: 9px; color: #1DB954; letter-spacing: 2px; }
 
 /* --- SIDEBAR --- */
 .sidebar {
 position: fixed; top: 0; right: -420px; width: 400px; height: 100%;
-background: rgba(10,10,10,0.98); backdrop-filter: blur(30px);
-z-index: 6000; padding: 30px; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+background: rgba(5,5,5,0.98); backdrop-filter: blur(50px);
+z-index: 6000; padding: 30px; transition: 0.5s;
 border-left: 1px solid rgba(255,255,255,0.1); overflow-y: auto;
 }
 .sidebar.open { right: 0; }
-.section { margin-bottom: 25px; }
-.label { font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; }
-.control-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; }
-input[type="range"] { width: 120px; accent-color: var(--accent); }
-.btn { background: var(--panel); border: 1px solid #333; color: white; padding: 8px; border-radius: 5px; cursor: pointer; font-size: 11px; width: 100%; margin-top: 5px; }
+.section-title { font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
+.row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 12px; }
+.btn { background: #111; border: 1px solid #333; color: white; padding: 6px; border-radius: 4px; font-size: 11px; width: 100%; cursor: pointer; }
 
-/* --- WIDGETS --- */
-.spotify-dock { position: fixed; bottom: 15px; left: 15px; width: 300px; height: 80px; z-index: 1000; border-radius: 12px; overflow: hidden; transition: 0.3s; opacity: 0.8; }
-.spotify-dock:hover { height: 152px; opacity: 1; }
-
-#stickyNote { position: fixed; top: 100px; left: 20px; width: 200px; height: 200px; background: rgba(255,255,150,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; z-index: 1000; display: none; }
-#stickyNote textarea { background: none; border: none; color: white; width: 100%; height: 100%; resize: none; font-size: 12px; font-family: inherit; cursor: none; }
-
-#cursor { position: fixed; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 15px var(--accent); transition: transform 0.1s ease-out; }
+#cursor { position: fixed; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 15px var(--accent); transition: transform 0.08s; }
 </style>
 </head>
 <body onclick="closeSidebarOutside(event)">
@@ -89,155 +107,144 @@ input[type="range"] { width: 120px; accent-color: var(--accent); }
 <canvas id="particleCanvas"></canvas>
 
 <div id="searchOverlay">
-<div style="padding:15px; display:flex; justify-content:space-between; align-items:center; background:#000;">
-<span style="font-size:10px; color:var(--accent); letter-spacing:2px;">INTERNAL BROWSER</span>
+<div class="overlay-header">
+<span style="font-family: Orbitron; font-size: 10px; color: var(--accent);">SECURE BROWSER</span>
 <i class="fas fa-times" onclick="closeBrowser()" style="cursor:pointer"></i>
 </div>
 <iframe id="searchIframe" src=""></iframe>
 </div>
 
-<div id="stickyNote">
-<div style="font-size:9px; opacity:0.5; margin-bottom:5px;">SCRATCHPAD</div>
-<textarea placeholder="Type something..."></textarea>
+<div class="spotify-dock">
+<div class="spotify-handle"><i class="fab fa-spotify"></i>  SPOTIFY PLAYER</div>
+<iframe id="spotFrame" src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM3M" width="100%" height="152" frameBorder="0" allow="autoplay; encrypted-media;"></iframe>
 </div>
 
 <nav class="top-nav">
-<div style="display:flex; gap:15px;">
+<div class="search-container">
+<div class="search-tabs">
+<div class="search-tab active" data-engine="local" onclick="setEngine('local')">Links</div>
+<div class="search-tab" data-engine="ddg" onclick="setEngine('ddg')">DuckDuckGo</div>
+<div class="search-tab" data-engine="google" onclick="setEngine('google')">Google</div>
+</div>
 <div class="search-bar">
 <i class="fas fa-search" style="opacity:0.3"></i>
-<input type="text" id="searchInput" placeholder="Search...">
+<input type="text" id="searchInput" placeholder="Search Links...">
 </div>
-<div id="pomoDisplay" style="padding:10px; background:var(--panel); border-radius:50px; font-size:12px; font-family:monospace; min-width:80px; text-align:center;">25:00</div>
 </div>
-
 <div style="display:flex; gap:25px; align-items:center;">
-<div id="clock" style="font-family: monospace; font-size: 13px;">00:00:00</div>
-<i class="fas fa-th-large" onclick="toggleSidebar(event)" style="cursor:pointer; color:var(--accent);"></i>
+<div id="battery" style="font-family: monospace; font-size: 11px; color: var(--accent);">--%</div>
+<div id="clock" style="font-family: monospace; opacity:0.6; font-size: 13px;">00:00:00 AM</div>
+<i class="fas fa-sliders-h" onclick="toggleSidebar(event)" style="cursor:pointer; font-size: 20px; color: var(--accent);"></i>
 </div>
 </nav>
 
 <main><div class="grid" id="grid"></div></main>
 
-<div class="spotify-dock">
-<iframe id="spotIframe" src="https://open.spotify.com/embed/playlist/37i9dQZF1DWWQRvui9Df7X?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
-</div>
-
 <aside class="sidebar" id="sidebar">
-<h2 style="letter-spacing:4px;">SYSTEM CONFIG</h2>
+<h2 style="font-family: Orbitron; font-weight:400;">ELITE SETTINGS</h2>
 
-<div class="section">
-<span class="label">Aesthetics</span>
-<div class="control-row">Accent Color <input type="color" id="accPick" onchange="upd('accent', this.value)"></div>
-<div class="control-row">Bloom <input type="range" min="0" max="15" value="0" oninput="updCSS('--bloom', this.value+'px')"></div>
-<div class="control-row">Vignette <input type="range" min="0" max="100" value="40" oninput="updCSS('--vignette', this.value+'%')"></div>
-<div class="control-row">Glass Blur <input type="range" min="0" max="30" value="12" oninput="updCSS('--blur', this.value+'px')"></div>
-<div class="control-row">Custom Font <input type="text" placeholder="Orbitron" style="width:100px; font-size:10px;" onchange="changeFont(this.value)"></div>
-</div>
+<div class="section-title">Aesthetics</div>
+<div class="row">Accent <input type="color" value="#00f2ff" onchange="updAcc(this.value)"></div>
+<div class="row">Particles <input type="color" value="#00f2ff" onchange="updPart(this.value)"></div>
+<div class="row">Bloom <input type="range" min="0" max="10" value="0" oninput="updCSS('--bloom', this.value+'px')"></div>
+<div class="row">Vignette <input type="range" min="0" max="100" value="40" oninput="updCSS('--vignette', this.value+'%')"></div>
+<div class="row">Wallpaper <input type="file" accept="image/*" onchange="updBack(this)"></div>
 
-<div class="section">
-<span class="label">Productivity</span>
-<div class="control-row">Pomodoro <button class="btn" style="width:60px;" onclick="startPomo()">Start</button></div>
-<div class="control-row">Sticky Note <button class="btn" style="width:60px;" onclick="toggleWidget('sticky')">Toggle</button></div>
-<div class="control-row">Soundscape
-<select class="btn" style="width:100px;" onchange="playSound(this.value)">
-<option value="none">None</option>
-<option value="rain">Rain</option>
-<option value="waves">Ocean</option>
-</select>
-</div>
-</div>
+<div class="section-title">Grid Architect</div>
+<div class="row">Columns <input type="range" min="2" max="8" value="4" oninput="updCSS('--grid-cols', this.value)"></div>
+<div class="row">Box Size <input type="range" min="80" max="220" value="140" oninput="updCSS('--box-size', this.value+'px')"></div>
+<div class="row">Gap <input type="range" min="5" max="50" value="20" oninput="updCSS('--gap', this.value+'px')"></div>
 
-<div class="section">
-<span class="label">Link Architect</span>
-<input type="text" id="ln" placeholder="Title" class="btn">
-<input type="text" id="lu" placeholder="URL" class="btn">
-<button class="btn" style="border-color:var(--accent)" onclick="addLink()">Append Link</button>
-<button class="btn" style="border-color:#ff4444; color:#ff4444;" onclick="clearLinks()">Clear All</button>
-</div>
+<div class="section-title">Spotify</div>
+<input type="text" id="spotUrl" placeholder="Paste Playlist URL" class="btn" style="margin-bottom:5px;">
+<button class="btn" onclick="updSpot()">Update Player</button>
 
-<button class="btn" onclick="location.reload()" style="margin-top:20px;">Save & Reload</button>
+<div class="section-title">Management</div>
+<button class="btn" style="color:#ff4444; border-color:#ff4444;" onclick="reset()">FACTORY RESET</button>
 </aside>
 
 <script>
-let links = JSON.parse(localStorage.getItem('nx_u_links')) || [
-{n: "Google", u: "https://google.com"}, {n: "YouTube", u: "https://youtube.com"},
-{n: "GitHub", u: "https://github.com"}, {n: "Discord", u: "https://discord.com"}
+const links = [
+{ name: "Nexora", url: "https://mathematicss.global.ssl.fastly.net" }, { name: "Luminal", url: "https://sciencea.global.ssl.fastly.net" },
+{ name: "Hideout", url: "https://artsuplies.global.ssl.fastly.net" }, { name: "Holy Tuna", url: "https://fishingsuplies.global.ssl.fastly.net" },
+{ name: "Noah Hub", url: "https://memeresetaintgonnawork.global.ssl.fastly.net" }, { name: "Velara", url: "https://t2026soon.global.ssl.fastly.net" },
+{ name: "Strongdog", url: "https://spanishtranslator.global.ssl.fastly.net" }, { name: "Movies", url: "https://mrbeastisrich.global.ssl.fastly.net" },
+{ name: "Petezah", url: "https://AAbattery.global.ssl.fastly.net" }, { name: "Roblox", url: "https://our-ddddd.global.ssl.fastly.net" },
+{ name: "Froggie", url: "https://froggie.global.ssl.fastly.net" }, { name: "Interstellar", url: "https://interstellar.global.ssl.fastly.net" },
+{ name: "Utopia", url: "https://utopia.global.ssl.fastly.net" }, { name: "Shadow", url: "https://shadow.global.ssl.fastly.net" },
+{ name: "Nebula", url: "https://nebula.global.ssl.fastly.net" }, { name: "Zenith", url: "https://zenith.global.ssl.fastly.net" }
 ];
 
+let engine = 'local';
+
 window.onload = () => {
-renderGrid();
+renderGrid(links);
 initClock();
+initBattery();
 initParticles();
 initCursor();
-if(localStorage.getItem('nx_font')) changeFont(localStorage.getItem('nx_font'));
+if(localStorage.getItem('nx_bg')) document.body.style.backgroundImage = `url(${localStorage.getItem('nx_bg')})`;
 };
 
 function updCSS(p, v) { document.documentElement.style.setProperty(p, v); }
-function upd(t, v) {
-if(t==='accent') {
-updCSS('--accent', v);
-updCSS('--accent-glow', v+'44');
+function updAcc(v) { updCSS('--accent', v); updCSS('--accent-glow', v+'44'); }
+function updPart(v) { updCSS('--part-color', v); }
+function updBack(i) { if(i.files[0]) { const r = new FileReader(); r.onload = (e) => { document.body.style.backgroundImage = `url(${e.target.result})`; localStorage.setItem('nx_bg', e.target.result); }; r.readAsDataURL(i.files[0]); } }
+
+function updSpot() {
+const url = document.getElementById('spotUrl').value;
+if(url.includes("spotify.com")) {
+const embed = url.replace("open.spotify.com/", "open.spotify.com/embed/");
+document.getElementById('spotFrame').src = embed;
 }
 }
 
-function changeFont(f) {
-document.getElementById('mainFont').href = `https://fonts.googleapis.com/css2?family=${f.replace(' ', '+')}&display=swap`;
-document.documentElement.style.setProperty('--font', `'${f}', sans-serif`);
-localStorage.setItem('nx_font', f);
-}
-
-function renderGrid() {
+function renderGrid(data) {
 const g = document.getElementById('grid'); g.innerHTML = '';
-links.forEach(l => {
-const b = document.createElement('a');
-b.className = 'box'; b.href = l.u; b.target = "_blank";
-b.innerHTML = `<i class="fas fa-link" style="opacity:0.3"></i><span>${l.n}</span>`;
-g.appendChild(b);
+data.forEach(l => {
+const b = document.createElement('a'); b.className = 'box'; b.href = l.url; b.target = "_blank";
+b.innerHTML = `<span>${l.name}</span>`; g.appendChild(b);
 });
 }
 
-function addLink() {
-const n = document.getElementById('ln').value, u = document.getElementById('lu').value;
-if(n && u) { links.push({n, u}); localStorage.setItem('nx_u_links', JSON.stringify(links)); renderGrid(); }
+function setEngine(e) {
+engine = e;
+document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+document.querySelector(`[data-engine="${e}"]`).classList.add('active');
+document.getElementById('searchInput').placeholder = e === 'local' ? "Search Links..." : `Search ${e.toUpperCase()}...`;
 }
-
-function clearLinks() { links = []; localStorage.removeItem('nx_u_links'); renderGrid(); }
 
 document.getElementById('searchInput').onkeydown = (e) => {
 if(e.key === 'Enter') {
 const q = e.target.value;
-document.getElementById('searchOverlay').style.display = 'flex';
-document.getElementById('searchIframe').src = `https://duckduckgo.com/?q=${q}&kp=-2`;
+if(engine === 'ddg') { document.getElementById('searchOverlay').style.display = 'flex'; document.getElementById('searchIframe').src = `https://duckduckgo.com/?q=${q}&kp=-2`; }
+else if(engine === 'google') window.open(`https://google.com/search?q=${q}`);
 }
+};
+
+document.getElementById('searchInput').oninput = (e) => {
+if(engine === 'local') renderGrid(links.filter(l => l.name.toLowerCase().includes(e.target.value.toLowerCase())));
 };
 
 function closeBrowser() { document.getElementById('searchOverlay').style.display='none'; document.getElementById('searchIframe').src=''; }
 function toggleSidebar(e) { e.stopPropagation(); document.getElementById('sidebar').classList.toggle('open'); }
 function closeSidebarOutside(e) { if(!document.getElementById('sidebar').contains(e.target)) document.getElementById('sidebar').classList.remove('open'); }
-function toggleWidget(w) { const s = document.getElementById('stickyNote'); s.style.display = s.style.display==='block'?'none':'block'; }
-
-function startPomo() {
-let t = 1500;
-const iv = setInterval(() => {
-t--;
-const m = Math.floor(t/60), s = t%60;
-document.getElementById('pomoDisplay').innerText = `${m}:${s<10?'0':''}${s}`;
-if(t <= 0) { clearInterval(iv); alert("Focus session complete!"); }
-}, 1000);
-}
+function reset() { localStorage.clear(); location.reload(); }
 
 function initClock() { setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000); }
-function initCursor() { const c = document.getElementById('cursor'); window.onmousemove = e => c.style.transform = `translate(${e.clientX-5}px,${e.clientY-5}px)`; }
+function initBattery() { navigator.getBattery().then(b => { const u = () => document.getElementById('battery').innerText = Math.round(b.level*100) + "%"; u(); b.onlevelchange = u; }); }
+function initCursor() { const c = document.getElementById('cursor'); window.onmousemove = e => c.style.transform = `translate(${e.clientX-4}px,${e.clientY-4}px)`; }
 
 function initParticles() {
 const cvs = document.getElementById('particleCanvas'), ctx = cvs.getContext('2d');
 let w = cvs.width = window.innerWidth, h = cvs.height = window.innerHeight;
-let p = Array.from({length: 100}, () => ({x:Math.random()*w, y:Math.random()*h, s:Math.random()*2}));
+let pts = Array.from({length: 80}, () => ({x:Math.random()*w, y:Math.random()*h, vx:Math.random()-0.5, vy:Math.random()-0.5}));
 function drw() {
-ctx.clearRect(0,0,w,h); ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-p.forEach(i => {
-i.y -= i.s; if(i.y < 0) i.y = h;
-ctx.globalAlpha = 0.3; ctx.fillRect(i.x, i.y, 1, 1);
+ctx.clearRect(0,0,w,h); ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--part-color');
+pts.forEach(p => {
+p.x += p.vx; p.y += p.vy;
+if(p.x<0||p.x>w) p.vx*=-1; if(p.y<0||p.y>h) p.vy*=-1;
+ctx.globalAlpha = 0.2; ctx.beginPath(); ctx.arc(p.x, p.y, 1.2, 0, Math.PI*2); ctx.fill();
 });
 requestAnimationFrame(drw);
 }
