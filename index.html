@@ -1,244 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="siteTitle">Nexora Hub | Elite</title>
+<link id="siteIcon" rel="icon" href="https://www.google.com/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg: #030303; --accent: #00f2ff; --glow: rgba(0, 242, 255, 0.3);
+--box-size: 140px; --grid-cols: 4; --vignette: 45%;
+}
+* { cursor: none !important; box-sizing: border-box; outline: none; }
+body {
+margin: 0; height: 100vh; background: var(--bg); color: white;
+font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden;
+background-size: cover; background-position: center;
+}
+body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(circle, transparent var(--vignette), black 150%); }
+#particleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; padding: 10px; z-index: 1000; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); border-radius: 0 0 15px 15px; border: 1px solid rgba(255,255,255,0.1); }
+.tab { padding: 8px 25px; border-radius: 10px; font-family: Orbitron; font-size: 10px; color: #666; transition: 0.3s; cursor: pointer; border: none; background: none; }
+.tab.active { color: var(--accent); background: rgba(255,255,255,0.05); box-shadow: 0 0 15px var(--glow); }
+
+.view { position: absolute; inset: 0; display: none; padding-top: 70px; z-index: 3; flex-direction: column; align-items: center; }
+.view.active { display: flex; animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+.window-frame { width: 95%; height: 85%; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+iframe { width: 100%; height: 100%; border: none; background: #000; }
+
+.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: 20px; padding: 20px; overflow-y: auto; max-height: 80vh; }
+.box { width: var(--box-size); height: var(--box-size); background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; transition: 0.3s; }
+.box:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 0 30px var(--glow); background: rgba(255,255,255,0.08); }
+.box span { font-size: 10px; font-weight: 600; letter-spacing: 1px; color: #fff; text-align: center; pointer-events: none; }
+
+.sidebar { position: fixed; top: 0; right: -420px; width: 400px; height: 100%; background: rgba(5,5,5,0.98); backdrop-filter: blur(40px); z-index: 6000; padding: 30px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-left: 1px solid rgba(255,255,255,0.1); overflow-y: auto; }
+.sidebar.open { right: 0; }
+.section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; }
+.label { font-size: 9px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; display: block; }
+input, select, .btn { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 6px; font-size: 11px; width: 100%; margin-top: 5px; }
+.btn:hover { background: #222; border-color: var(--accent); cursor: pointer; }
+
+#cursor { position: fixed; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 15px var(--accent); transition: transform 0.06s linear; transform: translate(-50%, -50%); }
+</style>
+</head>
+<body onclick="closeSidebar(event)">
+
+<div id="cursor"></div>
+<canvas id="particleCanvas"></canvas>
+
+<div class="tab-bar">
+<button class="tab active" onclick="switchTab('home', this)">HUB</button>
+<button class="tab" onclick="switchTab('browser', this)">BROWSER</button>
+<button class="tab" onclick="switchTab('media', this)">SPOTIFY</button>
+</div>
+
+<div style="position:fixed; right:30px; top:15px; z-index:1000; display:flex; align-items:center; gap:15px;">
+<div id="clock" style="font-family: monospace; font-size: 12px; color: var(--accent);">00:00:00</div>
+<i class="fas fa-bars-staggered" onclick="event.stopPropagation(); document.getElementById('sidebar').classList.toggle('open')" style="cursor:pointer; color: var(--accent); font-size: 18px;"></i>
+</div>
+
+<div id="home" class="view active"><div class="grid" id="grid"></div></div>
+
+<div id="browser" class="view">
+<div class="window-frame">
+<iframe id="browserFrame" src="https://duckduckgo.com/search?q=Nexora+Hub&kae=d"></iframe>
+</div>
+</div>
+
+<div id="media" class="view">
+<div class="window-frame" style="max-width: 900px; height: 600px;">
+<iframe src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM3M" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+</div>
+</div>
+
+<aside class="sidebar" id="sidebar">
+<h2 style="font-family: Orbitron; font-size: 18px;">ELITE SETTINGS</h2>
+<div class="section">
+<span class="label">Cloak Identity</span>
+<input type="text" id="nameIn" placeholder="Fake Site Title" onchange="saveSet()">
+<input type="text" id="iconIn" placeholder="Fake Favicon URL" onchange="saveSet()">
+</div>
+<div class="section">
+<span class="label">Particle Customizer</span>
+<input type="text" id="emojiIn" placeholder="Enter Emoji(s)" oninput="updateParticles()">
+<div style="margin-top:10px;">
+<span class="label">Or Particle Image</span>
+<input type="file" accept="image/*" onchange="setPartImg(this)">
+</div>
+<div style="margin-top:10px;">
+<span class="label">Count: <span id="countVal">50</span></span>
+<input type="range" id="partCount" min="5" max="150" value="50" oninput="document.getElementById('countVal').innerText=this.value; updateParticles()">
+</div>
+</div>
+<div class="section">
+<span class="label">Visuals</span>
+<div style="display:flex; justify-content:space-between; align-items:center;">
+Accent <input type="color" id="accPick" style="width:50px" onchange="updAccent(this.value)">
+</div>
+<span class="label" style="margin-top:10px;">Wallpaper</span>
+<input type="file" accept="image/*" onchange="updBg(this)">
+</div>
+<button class="btn" style="color:#ff4444; border-color:#ff4444;" onclick="if(confirm('Reset all settings?')){localStorage.clear(); location.reload();}">FACTORY RESET</button>
+</aside>
+
 <script>
 const links = [
-{ n: "Nexora", u: "https://mathematicss.global.ssl.fastly.net" },
-{ n: "Luminal", u: "https://sciencea.global.ssl.fastly.net" },
-{ n: "Hideout", u: "https://artsuplies.global.ssl.fastly.net" },
-{ n: "Holy Tuna", u: "https://fishingsuplies.global.ssl.fastly.net" },
-{ n: "Noah Hub", u: "https://memeresetaintgonnawork.global.ssl.fastly.net" },
-{ n: "Velara", u: "https://t2026soon.global.ssl.fastly.net" },
-{ n: "Strongdog", u: "https://spanishtranslator.global.ssl.fastly.net" },
-{ n: "Movies", u: "https://mrbeastisrich.global.ssl.fastly.net" },
-{ n: "Petezah", u: "https://AAbattery.global.ssl.fastly.net" },
-{ n: "Roblox", u: "https://our-ddddd.global.ssl.fastly.net" },
-{ n: "Froggie", u: "https://froggie.global.ssl.fastly.net" },
-{ n: "Interstellar", u: "https://interstellar.global.ssl.fastly.net" },
-{ n: "Utopia", u: "https://utopia.global.ssl.fastly.net" },
-{ n: "Shadow", u: "https://shadow.global.ssl.fastly.net" },
-{ n: "Nebula", u: "https://nebula.global.ssl.fastly.net" },
-{ n: "Zenith", u: "https://zenith.global.ssl.fastly.net" }
+{ n: "Nexora", u: "https://mathematicss.global.ssl.fastly.net" }, { n: "Luminal", u: "https://sciencea.global.ssl.fastly.net" },
+{ n: "Hideout", u: "https://artsuplies.global.ssl.fastly.net" }, { n: "Holy Tuna", u: "https://fishingsuplies.global.ssl.fastly.net" },
+{ n: "Noah Hub", u: "https://memeresetaintgonnawork.global.ssl.fastly.net" }, { n: "Velara", u: "https://t2026soon.global.ssl.fastly.net" },
+{ n: "Strongdog", u: "https://spanishtranslator.global.ssl.fastly.net" }, { n: "Movies", u: "https://mrbeastisrich.global.ssl.fastly.net" },
+{ n: "Petezah", u: "https://AAbattery.global.ssl.fastly.net" }, { n: "Roblox", u: "https://our-ddddd.global.ssl.fastly.net" },
+{ n: "Froggie", u: "https://froggie.global.ssl.fastly.net" }, { n: "Interstellar", u: "https://interstellar.global.ssl.fastly.net" },
+{ n: "Utopia", u: "https://utopia.global.ssl.fastly.net" }, { n: "Shadow", u: "https://shadow.global.ssl.fastly.net" },
+{ n: "Nebula", u: "https://nebula.global.ssl.fastly.net" }, { n: "Zenith", u: "https://zenith.global.ssl.fastly.net" }
 ];
 
-let pImg = null;
-let particles = [];
-let cvs, ctx;
-let animationId;
+let pImg = null, particles = [], cvs, ctx;
 
 window.onload = () => {
-  cvs = document.getElementById('particleCanvas');
-  ctx = cvs.getContext('2d');
-  resizeCanvas();
-  renderGrid();
-  initClock();
-  initCursor();
-  loadSettings();
-  updateParticles();
-  loop();
+cvs = document.getElementById('particleCanvas');
+ctx = cvs.getContext('2d');
+resize();
+renderGrid();
+initClock();
+initCursor();
+loadSettings();
+updateParticles();
+requestAnimationFrame(loop);
 };
 
-window.addEventListener("resize", () => {
-  resizeCanvas();
-});
-
-function resizeCanvas() {
-  if (!cvs) return;
-  cvs.width = window.innerWidth;
-  cvs.height = window.innerHeight;
-}
+window.onresize = resize;
+function resize() { if(cvs) { cvs.width = window.innerWidth; cvs.height = window.innerHeight; } }
 
 function switchTab(id, el) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  el.classList.add('active');
+document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+el.classList.add('active');
 }
 
 function renderGrid() {
-  const g = document.getElementById('grid');
-  g.innerHTML = ""; // FIX: prevent duplication
-  links.forEach(l => {
-    const b = document.createElement('a');
-    b.className = 'box';
-    b.href = l.u;
-    b.target = "_blank";
-    b.innerHTML = `<span>${l.n}</span>`;
-    g.appendChild(b);
-  });
+const g = document.getElementById('grid');
+links.forEach(l => {
+const b = document.createElement('a');
+b.className = 'box'; b.href = l.u; b.target = "_blank";
+b.innerHTML = `<span>${l.n}</span>`;
+g.appendChild(b);
+});
 }
 
 function updateParticles() {
-  const count = parseInt(document.getElementById('partCount').value);
-  const emoji = document.getElementById('emojiIn').value || '•';
-
-  particles = [];
-
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x: Math.random() * cvs.width,
-      y: Math.random() * cvs.height,
-      vx: (Math.random() - 0.5) * 1.2,
-      vy: (Math.random() - 0.5) * 1.2,
-      size: Math.random() * 15 + 10,
-      emoji: emoji
-    });
-  }
-
-  localStorage.setItem('nx_emoji', emoji);
-  localStorage.setItem('nx_pcount', count);
+const count = parseInt(document.getElementById('partCount').value);
+const emoji = document.getElementById('emojiIn').value || '•';
+particles = Array.from({length: count}, () => ({
+x: Math.random() * window.innerWidth,
+y: Math.random() * window.innerHeight,
+vx: (Math.random() - 0.5) * 1.5,
+vy: (Math.random() - 0.5) * 1.5,
+size: Math.random() * 15 + 10,
+emoji: emoji
+}));
+localStorage.setItem('nx_emoji', emoji);
+localStorage.setItem('nx_pcount', count);
 }
 
 function setPartImg(input) {
-  if (!input.files[0]) return;
-
-  if (input.files[0].size > 2 * 1024 * 1024) {
-    alert("Image too large. Use under 2MB.");
-    return;
-  }
-
-  const r = new FileReader();
-  r.onload = (e) => {
-    const tempImg = new Image();
-    tempImg.onload = () => {
-      pImg = tempImg;
-      localStorage.setItem('nx_pimg', e.target.result);
-    };
-    tempImg.src = e.target.result;
-  };
-  r.readAsDataURL(input.files[0]);
+if(input.files[0]) {
+const r = new FileReader();
+r.onload = (e) => {
+const tempImg = new Image();
+tempImg.onload = () => { pImg = tempImg; localStorage.setItem('nx_pimg', e.target.result); };
+tempImg.src = e.target.result;
+};
+r.readAsDataURL(input.files[0]);
+}
 }
 
 function loop() {
-  ctx.clearRect(0, 0, cvs.width, cvs.height);
+ctx.clearRect(0, 0, cvs.width, cvs.height);
+const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+ctx.fillStyle = accent;
 
-  const accent = getComputedStyle(document.documentElement)
-    .getPropertyValue('--accent');
+particles.forEach(p => {
+p.x += p.vx; p.y += p.vy;
+if(p.x < -20) p.x = cvs.width + 20; if(p.x > cvs.width + 20) p.x = -20;
+if(p.y < -20) p.y = cvs.height + 20; if(p.y > cvs.height + 20) p.y = -20;
 
-  ctx.fillStyle = accent;
-
-  particles.forEach(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-
-    if (p.x < -30) p.x = cvs.width + 30;
-    if (p.x > cvs.width + 30) p.x = -30;
-    if (p.y < -30) p.y = cvs.height + 30;
-    if (p.y > cvs.height + 30) p.y = -30;
-
-    ctx.globalAlpha = 0.4;
-
-    if (pImg && pImg.complete) {
-      ctx.drawImage(pImg, p.x, p.y, p.size, p.size);
-    } else {
-      ctx.font = `${p.size}px Arial`;
-      ctx.fillText(p.emoji, p.x, p.y);
-    }
-  });
-
-  animationId = requestAnimationFrame(loop);
+if(pImg && pImg.complete) {
+ctx.globalAlpha = 0.5;
+ctx.drawImage(pImg, p.x, p.y, p.size, p.size);
+} else {
+ctx.globalAlpha = 0.4;
+ctx.font = `${p.size}px Arial`;
+ctx.fillText(p.emoji, p.x, p.y);
+}
+});
+requestAnimationFrame(loop);
 }
 
 function updAccent(c) {
-  document.documentElement.style.setProperty('--accent', c);
-  document.documentElement.style.setProperty('--glow', c + '44');
-  localStorage.setItem('nx_acc', c);
+document.documentElement.style.setProperty('--accent', c);
+document.documentElement.style.setProperty('--glow', c+'44');
+localStorage.setItem('nx_acc', c);
 }
 
 function updBg(i) {
-  if (!i.files[0]) return;
-
-  if (i.files[0].size > 3 * 1024 * 1024) {
-    alert("Wallpaper too large. Use under 3MB.");
-    return;
-  }
-
-  const r = new FileReader();
-  r.onload = (e) => {
-    document.body.style.backgroundImage = `url(${e.target.result})`;
-    localStorage.setItem('nx_bg', e.target.result);
-  };
-  r.readAsDataURL(i.files[0]);
+if(i.files[0]) {
+const r = new FileReader();
+r.onload = (e) => {
+try {
+document.body.style.backgroundImage = `url(${e.target.result})`;
+localStorage.setItem('nx_bg', e.target.result);
+} catch(err) { alert("Image too large for memory. Use a smaller file."); }
+};
+r.readAsDataURL(i.files[0]);
+}
 }
 
 function saveSet() {
-  const n = document.getElementById('nameIn').value;
-  const i = document.getElementById('iconIn').value;
-
-  if (n) {
-    document.title = n;
-    localStorage.setItem('nx_name', n);
-  }
-
-  if (i) {
-    document.getElementById('siteIcon').href = i;
-    localStorage.setItem('nx_icon', i);
-  }
+const n = document.getElementById('nameIn').value, i = document.getElementById('iconIn').value;
+if(n) { document.title = n; localStorage.setItem('nx_name', n); }
+if(i) { document.getElementById('siteIcon').href = i; localStorage.setItem('nx_icon', i); }
 }
 
 function loadSettings() {
-  const bg = localStorage.getItem('nx_bg');
-  const name = localStorage.getItem('nx_name');
-  const icon = localStorage.getItem('nx_icon');
-  const acc = localStorage.getItem('nx_acc');
-  const emo = localStorage.getItem('nx_emoji');
-  const cnt = localStorage.getItem('nx_pcount');
-  const pimg = localStorage.getItem('nx_pimg');
-
-  if (bg) document.body.style.backgroundImage = `url(${bg})`;
-  if (name) {
-    document.title = name;
-    document.getElementById('nameIn').value = name;
-  }
-  if (icon) {
-    document.getElementById('siteIcon').href = icon;
-    document.getElementById('iconIn').value = icon;
-  }
-  if (acc) updAccent(acc);
-  if (emo) document.getElementById('emojiIn').value = emo;
-  if (cnt) {
-    document.getElementById('partCount').value = cnt;
-    document.getElementById('countVal').innerText = cnt;
-  }
-  if (pimg) {
-    pImg = new Image();
-    pImg.src = pimg;
-  }
+const bg = localStorage.getItem('nx_bg'), name = localStorage.getItem('nx_name'),
+icon = localStorage.getItem('nx_icon'), acc = localStorage.getItem('nx_acc'),
+emo = localStorage.getItem('nx_emoji'), cnt = localStorage.getItem('nx_pcount'),
+pimg = localStorage.getItem('nx_pimg');
+if(bg) document.body.style.backgroundImage = `url(${bg})`;
+if(name) { document.title = name; document.getElementById('nameIn').value = name; }
+if(icon) { document.getElementById('siteIcon').href = icon; document.getElementById('iconIn').value = icon; }
+if(acc) updAccent(acc);
+if(emo) document.getElementById('emojiIn').value = emo;
+if(cnt) { document.getElementById('partCount').value = cnt; document.getElementById('countVal').innerText = cnt; }
+if(pimg) { pImg = new Image(); pImg.src = pimg; }
 }
 
-function initClock() {
-  setInterval(() => {
-    document.getElementById('clock').innerText =
-      new Date().toLocaleTimeString();
-  }, 1000);
-}
-
+function initClock() { setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000); }
 function initCursor() {
-  const c = document.getElementById('cursor');
-  window.onmousemove = e => {
-    c.style.left = e.clientX + 'px';
-    c.style.top = e.clientY + 'px';
-  };
+const c = document.getElementById('cursor');
+window.onmousemove = e => {
+c.style.left = e.clientX + 'px';
+c.style.top = e.clientY + 'px';
+
+};
 }
-
-function closeSidebar(e) {
-  if (!document.getElementById('sidebar').contains(e.target)) {
-    document.getElementById('sidebar').classList.remove('open');
-  }
-}
-
-/* ===== FIXED BROWSER LOADER ===== */
-
-function loadURL() {
-  const frame = document.getElementById("browserFrame");
-  const input = document.getElementById("urlBar").value.trim();
-
-  if (!input) return;
-
-  if (input.startsWith("http://") || input.startsWith("https://")) {
-    frame.src = input;
-  } else if (input.includes(".")) {
-    frame.src = "https://" + input;
-  } else {
-    frame.src = "https://lite.duckduckgo.com/lite/?q=" +
-      encodeURIComponent(input);
-  }
-}
+function closeSidebar(e) { if(!document.getElementById('sidebar').contains(e.target)) document.getElementById('sidebar').classList.remove('open'); }
 </script>
+</body>
+</html>
