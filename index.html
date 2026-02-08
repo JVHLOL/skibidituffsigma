@@ -3,51 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="siteTitle">Nexora Hub</title>
+<title id="siteTitle">Nexora Hub | Elite</title>
 <link id="siteIcon" rel="icon" href="https://www.google.com/favicon.ico">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&family=Space+Mono&family=Inter:wght@300;700&display=swap" rel="stylesheet">
 <style>
 :root {
 --bg: #030303; --accent: #00f2ff; --glow: rgba(0, 242, 255, 0.3);
 --box-size: 140px; --grid-cols: 4; --blur: 15px; --vignette: 40%;
+--font-main: 'Plus Jakarta Sans';
 }
 * { cursor: none !important; box-sizing: border-box; outline: none; }
 body {
 margin: 0; height: 100vh; background: var(--bg); color: white;
-font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; display: flex; flex-direction: column;
-background-size: cover; background-position: center;
+font-family: var(--font-main), sans-serif; overflow: hidden;
+background-size: cover; background-position: center; transition: background 0.5s;
 }
 body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(circle, transparent var(--vignette), black 150%); }
-#particleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.6; }
+#particleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.8; }
 
-/* --- BROWSER --- */
-#searchOverlay { position: fixed; inset: 30px; background: #fff; z-index: 5000; display: none; flex-direction: column; border-radius: 12px; border: 1px solid var(--accent); box-shadow: 0 0 50px rgba(0,0,0,0.9); overflow: hidden; }
-.browser-header { padding: 10px 20px; background: #111; display: flex; justify-content: space-between; align-items: center; color: var(--accent); font-family: Orbitron; font-size: 10px; }
+/* --- TABS SYSTEM --- */
+.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; padding: 10px; z-index: 1000; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-radius: 0 0 20px 20px; border: 1px solid rgba(255,255,255,0.1); border-top: none; }
+.tab { padding: 8px 20px; border-radius: 12px; font-family: Orbitron; font-size: 11px; color: rgba(255,255,255,0.5); transition: 0.3s; }
+.tab.active { color: var(--accent); background: rgba(255,255,255,0.05); text-shadow: 0 0 10px var(--accent); }
 
-/* --- NAV --- */
-.top-nav { position: relative; z-index: 10; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
-.search-bar { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; padding: 10px 25px; display: flex; align-items: center; gap: 12px; width: 300px; backdrop-filter: blur(10px); }
-.search-bar input { background: none; border: none; color: white; width: 100%; font-size: 14px; cursor: none; }
+.view { position: absolute; inset: 0; display: none; padding-top: 80px; z-index: 3; flex-direction: column; align-items: center; }
+.view.active { display: flex; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- BROWSER TAB --- */
+.browser-container { width: 95%; height: 85%; border-radius: 15px; overflow: hidden; border: 1px solid var(--accent); box-shadow: 0 0 30px var(--glow); background: #000; }
+iframe { width: 100%; height: 100%; border: none; }
 
 /* --- GRID --- */
-main { flex: 1; display: flex; justify-content: center; align-items: center; z-index: 3; overflow-y: auto; padding: 50px 0; }
-.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: 20px; }
-.box { width: var(--box-size); height: var(--box-size); background: rgba(255,255,255,0.07); backdrop-filter: blur(var(--blur)); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; display: flex; justify-content: center; align-items: center; text-decoration: none; transition: 0.3s; position: relative; }
-.box:hover { border-color: var(--accent); box-shadow: 0 0 25px var(--glow); transform: translateY(-5px); }
-.box span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; }
-.delete-btn { position: absolute; top: 5px; right: 5px; color: #ff4444; font-size: 10px; opacity: 0; transition: 0.3s; cursor: pointer !important; }
-.box:hover .delete-btn { opacity: 1; }
+.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: 20px; padding-bottom: 50px; }
+.box { width: var(--box-size); height: var(--box-size); background: rgba(255,255,255,0.05); backdrop-filter: blur(var(--blur)); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; display: flex; justify-content: center; align-items: center; text-decoration: none; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.box:hover { border-color: var(--accent); box-shadow: 0 0 30px var(--glow); transform: scale(1.05); background: rgba(255,255,255,0.1); }
+.box span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: white; }
 
 /* --- SIDEBAR --- */
 .sidebar { position: fixed; top: 0; right: -420px; width: 400px; height: 100%; background: rgba(5,5,5,0.98); backdrop-filter: blur(40px); z-index: 6000; padding: 30px; transition: 0.5s; border-left: 1px solid rgba(255,255,255,0.1); overflow-y: auto; }
 .sidebar.open { right: 0; }
-.section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; }
+.section { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #222; }
 .label { font-size: 9px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; }
-.row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; }
-input, select, .btn { background: #111; border: 1px solid #333; color: white; padding: 8px; border-radius: 4px; font-size: 11px; width: 100%; margin-top: 5px; }
-.btn:hover { border-color: var(--accent); }
-.theme-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+select, input, .btn { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 6px; font-size: 11px; width: 100%; margin-top: 5px; }
 
 #cursor { position: fixed; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 15px var(--accent); transition: transform 0.08s; }
 </style>
@@ -57,65 +56,89 @@ input, select, .btn { background: #111; border: 1px solid #333; color: white; pa
 <div id="cursor"></div>
 <canvas id="particleCanvas"></canvas>
 
-<div id="searchOverlay">
-<div class="browser-header"><span>NEXUS INTERNAL BROWSER</span><i class="fas fa-times" onclick="toggleBrowser(false)" style="cursor:pointer"></i></div>
-<iframe id="searchIframe" src=""></iframe>
+<div class="tab-bar">
+<div class="tab active" onclick="switchTab('home')"><i class="fas fa-home"></i> HUB</div>
+<div class="tab" onclick="switchTab('browser')"><i class="fas fa-globe"></i> BROWSER</div>
+<div class="tab" onclick="switchTab('media')"><i class="fab fa-spotify"></i> MEDIA</div>
 </div>
 
-<nav class="top-nav">
-<div class="search-bar">
-<i class="fas fa-search" style="opacity:0.3"></i>
-<input type="text" id="searchInput" placeholder="Search Links / DuckDuckGo...">
-</div>
-<div style="display:flex; gap:25px; align-items:center;">
-<div id="clock" style="font-family: monospace; font-size: 13px; opacity: 0.7;">00:00:00</div>
-<i class="fas fa-bars-staggered" onclick="event.stopPropagation(); document.getElementById('sidebar').classList.toggle('open')" style="cursor:pointer; color: var(--accent); font-size: 20px;"></i>
-</div>
+<nav style="position:fixed; right:30px; top:20px; z-index:1000; display:flex; align-items:center; gap:20px;">
+<div id="clock" style="font-family: monospace; font-size: 13px; color: var(--accent);">00:00:00</div>
+<i class="fas fa-sliders" onclick="event.stopPropagation(); document.getElementById('sidebar').classList.toggle('open')" style="cursor:pointer; color: #fff; font-size: 20px;"></i>
 </nav>
 
+<div id="home" class="view active">
 <main><div class="grid" id="grid"></div></main>
+</div>
+
+<div id="browser" class="view">
+<div class="browser-container">
+<iframe src="https://duckduckgo.com/html"></iframe>
+</div>
+</div>
+
+<div id="media" class="view">
+<div class="browser-container" style="height: 600px; max-width: 800px;">
+<iframe src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM3M" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+</div>
+</div>
 
 <aside class="sidebar" id="sidebar">
-<h2 style="font-family: Orbitron; letter-spacing: 3px;">CUSTOMIZE</h2>
+<h2 style="font-family: Orbitron;">ULTIMATE CONFIG</h2>
 
 <div class="section">
-<span class="label">Spoof Identity</span>
-<input type="text" id="nameIn" placeholder="Website Name" onchange="updId()">
-<input type="text" id="iconIn" placeholder="Favicon URL" onchange="updId()">
-</div>
-
-<div class="section">
-<span class="label">Cool Themes</span>
-<div class="theme-grid">
-<button class="btn" onclick="applyTheme('#00f2ff', '#030303')">Cyan</button>
-<button class="btn" onclick="applyTheme('#ff0044', '#0a0000')">Blood</button>
-<button class="btn" onclick="applyTheme('#00ff41', '#000800')">Matrix</button>
-</div>
+<span class="label">Identity Cloaker</span>
+<input type="text" id="nameIn" placeholder="Cloak Name" onchange="updId()">
+<input type="text" id="iconIn" placeholder="Cloak Favicon URL" onchange="updId()">
 </div>
 
 <div class="section">
-<span class="label">Visual FX</span>
-<div class="row">Accent <input type="color" id="accPick" style="width:50px" onchange="applyTheme(this.value, null)"></div>
-<div class="row">Glow <input type="range" min="0" max="10" value="0" oninput="updCSS('--bloom', this.value+'px')"></div>
-<div class="row">Grid <input type="range" min="2" max="8" value="4" oninput="updCSS('--grid-cols', this.value)"></div>
-<div class="row">Wallpaper <input type="file" onchange="updBg(this)"></div>
+<span class="label">Typography</span>
+<select onchange="updCSS('--font-main', this.value)">
+<option value="'Plus Jakarta Sans'">Jakarta (Sleek)</option>
+<option value="'Orbitron'">Orbitron (Sci-Fi)</option>
+<option value="'Space Mono'">Space Mono (Hacker)</option>
+<option value="'Inter'">Inter (Clean)</option>
+</select>
 </div>
 
 <div class="section">
-<span class="label">Link Architect</span>
-<input type="text" id="ln" placeholder="Name">
-<input type="text" id="lu" placeholder="URL">
-<button class="btn" onclick="addLink()" style="border-color:var(--accent)">Add to Grid</button>
+<span class="label">Particle Type</span>
+<select id="partType" onchange="localStorage.setItem('partType', this.value); location.reload();">
+<option value="dot">Classic Dots</option>
+<option value="✨">Sparkles</option>
+<option value="🔥">Flame</option>
+<option value="💻">Binary</option>
+<option value="👾">Alien</option>
+</select>
 </div>
 
-<button class="btn" style="color:#ff4444; border-color:#ff4444; margin-top:20px;" onclick="localStorage.clear(); location.reload();">RESET EVERYTHING</button>
+<div class="section">
+<span class="label">Visuals</span>
+<div style="display:flex; justify-content: space-between; align-items:center; font-size: 11px;">
+Accent <input type="color" id="accPick" style="width:50px" onchange="applyTheme(this.value)">
+</div>
+<div style="margin-top:10px;">
+Vignette <input type="range" min="0" max="100" value="40" oninput="updCSS('--vignette', this.value+'%')">
+</div>
+<div style="margin-top:10px;">
+Wallpaper <input type="file" onchange="updBg(this)">
+</div>
+</div>
+
+<button class="btn" style="color:#ff4444; border-color:#ff4444;" onclick="localStorage.clear(); location.reload();">FACTORY RESET</button>
 </aside>
 
 <script>
-let links = JSON.parse(localStorage.getItem('nx_links')) || [
-{ n: "Nexora", u: "https://mathematicss.global.ssl.fastly.net" },
-{ n: "Luminal", u: "https://sciencea.global.ssl.fastly.net" },
-{ n: "Hideout", u: "https://artsuplies.global.ssl.fastly.net" }
+const links = [
+{ n: "Nexora", u: "https://mathematicss.global.ssl.fastly.net" }, { n: "Luminal", u: "https://sciencea.global.ssl.fastly.net" },
+{ n: "Hideout", u: "https://artsuplies.global.ssl.fastly.net" }, { n: "Holy Tuna", u: "https://fishingsuplies.global.ssl.fastly.net" },
+{ n: "Noah Hub", u: "https://memeresetaintgonnawork.global.ssl.fastly.net" }, { n: "Velara", u: "https://t2026soon.global.ssl.fastly.net" },
+{ n: "Strongdog", u: "https://spanishtranslator.global.ssl.fastly.net" }, { n: "Movies", u: "https://mrbeastisrich.global.ssl.fastly.net" },
+{ n: "Petezah", u: "https://AAbattery.global.ssl.fastly.net" }, { n: "Roblox", u: "https://our-ddddd.global.ssl.fastly.net" },
+{ n: "Froggie", u: "https://froggie.global.ssl.fastly.net" }, { n: "Interstellar", u: "https://interstellar.global.ssl.fastly.net" },
+{ n: "Utopia", u: "https://utopia.global.ssl.fastly.net" }, { n: "Shadow", u: "https://shadow.global.ssl.fastly.net" },
+{ n: "Nebula", u: "https://nebula.global.ssl.fastly.net" }, { n: "Zenith", u: "https://zenith.global.ssl.fastly.net" }
 ];
 
 window.onload = () => {
@@ -126,12 +149,15 @@ initCursor();
 loadSettings();
 };
 
-function updCSS(p, v) { document.documentElement.style.setProperty(p, v); localStorage.setItem('css_'+p, v); }
-
-function applyTheme(acc, bg) {
-if(acc) { updCSS('--accent', acc); updCSS('--glow', acc+'44'); }
-if(bg) { updCSS('--bg', bg); }
+function switchTab(id) {
+document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+event.currentTarget.classList.add('active');
 }
+
+function updCSS(p, v) { document.documentElement.style.setProperty(p, v); localStorage.setItem('css_'+p, v); }
+function applyTheme(acc) { updCSS('--accent', acc); updCSS('--glow', acc+'44'); }
 
 function updId() {
 const name = document.getElementById('nameIn').value;
@@ -140,56 +166,69 @@ if(name) { document.title = name; localStorage.setItem('nx_name', name); }
 if(icon) { document.getElementById('siteIcon').href = icon; localStorage.setItem('nx_icon', icon); }
 }
 
-function updBg(i) { if(i.files[0]) { const r = new FileReader(); r.onload = (e) => { document.body.style.backgroundImage = `url(${e.target.result})`; localStorage.setItem('nx_bg', e.target.result); }; r.readAsDataURL(i.files[0]); } }
-
-function addLink() {
-const n = document.getElementById('ln').value, u = document.getElementById('lu').value;
-if(n && u) { links.push({n, u}); saveLinks(); renderGrid(links); }
+function updBg(i) {
+if(i.files[0]) {
+const r = new FileReader();
+r.onload = (e) => { document.body.style.backgroundImage = `url(${e.target.result})`; localStorage.setItem('nx_bg', e.target.result); };
+r.readAsDataURL(i.files[0]);
 }
-
-function deleteLink(idx, e) { e.preventDefault(); e.stopPropagation(); links.splice(idx, 1); saveLinks(); renderGrid(links); }
-function saveLinks() { localStorage.setItem('nx_links', JSON.stringify(links)); }
+}
 
 function renderGrid(data) {
 const g = document.getElementById('grid'); g.innerHTML = '';
 data.forEach((l, i) => {
-const b = document.createElement('a'); b.className = 'box'; b.href = l.u; b.target = "_blank";
-b.innerHTML = `<i class="fas fa-times delete-btn" onclick="deleteLink(${i}, event)"></i><span>${l.n}</span>`;
+const b = document.createElement('a');
+b.className = 'box'; b.href = l.u; b.target = "_blank";
+b.style.animationDelay = `${i * 0.05}s`;
+b.innerHTML = `<span>${l.n}</span>`;
 g.appendChild(b);
 });
 }
 
-document.getElementById('searchInput').onkeydown = (e) => {
-if(e.key === 'Enter') {
-const q = e.target.value;
-toggleBrowser(true);
-document.getElementById('searchIframe').src = `https://duckduckgo.com/html/?q=${q}`;
-}
-};
-
-function toggleBrowser(show) { document.getElementById('searchOverlay').style.display = show ? 'flex' : 'none'; }
-function closeSidebar(e) { if(!document.getElementById('sidebar').contains(e.target)) document.getElementById('sidebar').classList.remove('open'); }
 function initClock() { setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000); }
-function initCursor() { const c = document.getElementById('cursor'); window.onmousemove = e => c.style.transform = `translate(${e.clientX-4}px,${e.clientY-4}px)`; }
+function initCursor() {
+const c = document.getElementById('cursor');
+window.onmousemove = e => {
+c.style.transform = `translate(${e.clientX-4}px,${e.clientY-4}px)`;
+};
+}
 
 function loadSettings() {
 if(localStorage.getItem('nx_bg')) document.body.style.backgroundImage = `url(${localStorage.getItem('nx_bg')})`;
 if(localStorage.getItem('nx_name')) { document.title = localStorage.getItem('nx_name'); document.getElementById('nameIn').value = localStorage.getItem('nx_name'); }
 if(localStorage.getItem('nx_icon')) { document.getElementById('siteIcon').href = localStorage.getItem('nx_icon'); document.getElementById('iconIn').value = localStorage.getItem('nx_icon'); }
+if(localStorage.getItem('partType')) document.getElementById('partType').value = localStorage.getItem('partType');
 Object.keys(localStorage).forEach(k => { if(k.startsWith('css_')) updCSS(k.replace('css_', ''), localStorage.getItem(k)); });
 }
 
 function initParticles() {
 const cvs = document.getElementById('particleCanvas'), ctx = cvs.getContext('2d');
 let w = cvs.width = window.innerWidth, h = cvs.height = window.innerHeight;
-let p = Array.from({length: 60}, () => ({x:Math.random()*w, y:Math.random()*h, vx:Math.random()-0.5, vy:Math.random()-0.5}));
+const type = localStorage.getItem('partType') || 'dot';
+let p = Array.from({length: 40}, () => ({
+x:Math.random()*w, y:Math.random()*h,
+vx:Math.random()-0.5, vy:Math.random()-0.5,
+s: Math.random() * 20 + 10
+}));
 function drw() {
-ctx.clearRect(0,0,w,h); ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-p.forEach(i => { i.x += i.vx; i.y += i.vy; if(i.x<0||i.x>w) i.vx*=-1; if(i.y<0||i.y>h) i.vy*=-1; ctx.globalAlpha = 0.2; ctx.beginPath(); ctx.arc(i.x, i.y, 1, 0, Math.PI*2); ctx.fill(); });
+ctx.clearRect(0,0,w,h);
+ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+ctx.font = "15px Arial";
+p.forEach(i => {
+i.x += i.vx; i.y += i.vy;
+if(i.x<0||i.x>w) i.vx*=-1; if(i.y<0||i.y>h) i.vy*=-1;
+if(type === 'dot') {
+ctx.globalAlpha = 0.3; ctx.beginPath(); ctx.arc(i.x, i.y, 2, 0, Math.PI*2); ctx.fill();
+} else {
+ctx.globalAlpha = 0.5; ctx.fillText(type, i.x, i.y);
+}
+});
 requestAnimationFrame(drw);
 }
 drw();
 }
+
+function closeSidebar(e) { if(!document.getElementById('sidebar').contains(e.target)) document.getElementById('sidebar').classList.remove('open'); }
 </script>
 </body>
 </html>
