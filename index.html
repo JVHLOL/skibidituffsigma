@@ -9,248 +9,626 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
---bg: #030303; --accent: #00f2ff; --glow: rgba(0, 242, 255, 0.3);
---box-size: 140px; --grid-cols: 4; --vignette: 45%;
+--bg: #030303;
+--accent: #00f2ff;
+--sec-accent: #ff0055;
+--text: #ffffff;
+--panel-bg: rgba(5,5,5,0.95);
+--glow: 0 0 20px rgba(0, 242, 255, 0.3);
+--box-size: 120px;
+--grid-gap: 20px;
+--glass-blur: 10px;
+--cursor-size: 10px;
+--grid-cols: 5;
+--radius: 12px;
+--font-main: 'Plus Jakarta Sans', sans-serif;
+--font-tech: 'Orbitron', monospace;
 }
-* { cursor: none !important; box-sizing: border-box; outline: none; }
+
+/* Core Reset & Body */
+* { box-sizing: border-box; outline: none; user-select: none; }
 body {
-margin: 0; height: 100vh; background: var(--bg); color: white;
-font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden;
-background-size: cover; background-position: center;
+margin: 0; height: 100vh; background: var(--bg); color: var(--text);
+font-family: var(--font-main); overflow: hidden;
+background-size: cover; background-position: center; transition: background 0.5s;
 }
-body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(circle, transparent var(--vignette), black 150%); }
+
+/* Cursors */
+body.custom-cursor * { cursor: none !important; }
+#cursor { position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); display: none; }
+#cursor.active { display: block; }
+#cursor .dot { width: var(--cursor-size); height: var(--cursor-size); background: var(--accent); border-radius: 50%; box-shadow: var(--glow); transition: transform 0.1s; }
+#cursor .ring { position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); width: calc(var(--cursor-size) * 3); height: calc(var(--cursor-size) * 3); border: 1px solid var(--accent); border-radius: 50%; opacity: 0.5; transition: 0.2s; }
+body:active #cursor .ring { transform: translate(-50%, -50%) scale(0.8); }
+
+/* Background Effects */
 #particleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(circle, transparent 50%, black 150%); }
+.scanline { position: fixed; inset: 0; z-index: 9000; pointer-events: none; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; display: none; }
+.scanline.active { display: block; }
 
-.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; padding: 10px; z-index: 1000; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); border-radius: 0 0 15px 15px; border: 1px solid rgba(255,255,255,0.1); }
-.tab { padding: 8px 25px; border-radius: 10px; font-family: Orbitron; font-size: 10px; color: #666; transition: 0.3s; cursor: pointer; border: none; background: none; }
-.tab.active { color: var(--accent); background: rgba(255,255,255,0.05); box-shadow: 0 0 15px var(--glow); }
+/* UI Components */
+.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; padding: 12px 20px; z-index: 100; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); border-radius: 0 0 20px 20px; border: 1px solid rgba(255,255,255,0.1); border-top: none; }
+.tab { padding: 8px 25px; border-radius: 8px; font-family: var(--font-tech); font-size: 11px; color: #888; transition: 0.3s; cursor: pointer; border: 1px solid transparent; background: transparent; text-transform: uppercase; letter-spacing: 1px; }
+.tab:hover { color: #fff; }
+.tab.active { color: var(--accent); background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); box-shadow: var(--glow); }
 
-.view { position: absolute; inset: 0; display: none; padding-top: 70px; z-index: 3; flex-direction: column; align-items: center; }
-.view.active { display: flex; animation: fadeIn 0.3s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+/* Views */
+.view { position: absolute; inset: 0; display: none; padding-top: 80px; z-index: 10; flex-direction: column; align-items: center; }
+.view.active { display: flex; animation: fadeUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-.window-frame { width: 95%; height: 85%; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-iframe { width: 100%; height: 100%; border: none; background: #000; }
+/* Grid System */
+.grid-container { overflow-y: auto; max-height: 85vh; width: 100%; display: flex; justify-content: center; padding-bottom: 50px; }
+.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: var(--grid-gap); padding: 20px; }
+.box {
+position: relative; width: var(--box-size); height: var(--box-size);
+background: rgba(255,255,255,0.03); backdrop-filter: blur(var(--glass-blur));
+border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+display: flex; flex-direction: column; justify-content: center; align-items: center;
+text-decoration: none; transition: 0.3s; overflow: hidden;
+}
+.box:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: var(--glow); background: rgba(255,255,255,0.08); z-index: 20; }
+.box i { font-size: 24px; color: #ccc; margin-bottom: 10px; transition: 0.3s; }
+.box:hover i { color: var(--accent); transform: scale(1.1); }
+.box span { font-size: 10px; font-weight: 600; letter-spacing: 1px; color: #fff; text-align: center; font-family: var(--font-main); }
+.box .del-btn { position: absolute; top: 5px; right: 5px; color: #ff4444; font-size: 12px; padding: 5px; opacity: 0; transition: 0.2s; cursor: pointer; }
+.box:hover .del-btn { opacity: 1; }
 
-.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: 20px; padding: 20px; overflow-y: auto; max-height: 80vh; }
-.box { width: var(--box-size); height: var(--box-size); background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; transition: 0.3s; }
-.box:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 0 30px var(--glow); background: rgba(255,255,255,0.08); }
-.box span { font-size: 10px; font-weight: 600; letter-spacing: 1px; color: #fff; text-align: center; pointer-events: none; }
+/* Media Player */
+.window-frame { width: 90%; max-width: 1000px; height: 70vh; border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display:flex; flex-direction: column; position: relative; }
+iframe { width: 100%; height: 100%; border: none; background: #000; flex-grow: 1; }
+.media-bar { padding: 15px; background: #080808; border-top: 1px solid #222; display: flex; gap: 10px; }
 
-.sidebar { position: fixed; top: 0; right: -420px; width: 400px; height: 100%; background: rgba(5,5,5,0.98); backdrop-filter: blur(40px); z-index: 6000; padding: 30px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-left: 1px solid rgba(255,255,255,0.1); overflow-y: auto; }
-.sidebar.open { right: 0; }
-.section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; }
-.label { font-size: 9px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; display: block; }
-input, select, .btn { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 6px; font-size: 11px; width: 100%; margin-top: 5px; }
-.btn:hover { background: #222; border-color: var(--accent); cursor: pointer; }
+/* Widgets Overlay */
+.widget-area { position: fixed; top: 20px; right: 20px; text-align: right; z-index: 50; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
+.clock { font-family: var(--font-tech); font-size: 24px; color: var(--text); text-shadow: 0 0 10px var(--accent); font-weight: 700; }
+.date { font-size: 11px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+.sys-stat { font-family: monospace; font-size: 10px; color: var(--sec-accent); margin-top: 5px; display: none; }
 
-#cursor { position: fixed; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 15px var(--accent); transition: transform 0.06s linear; transform: translate(-50%, -50%); }
+/* Sidebar Settings */
+.sidebar-btn { position: fixed; bottom: 20px; right: 20px; z-index: 200; font-size: 20px; color: var(--text); background: rgba(0,0,0,0.5); padding: 15px; border-radius: 50%; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
+.sidebar-btn:hover { color: var(--accent); border-color: var(--accent); transform: rotate(90deg); }
+
+.sidebar {
+position: fixed; top: 0; right: -450px; width: 400px; height: 100%;
+background: var(--panel-bg); backdrop-filter: blur(40px); z-index: 5000;
+padding: 0; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+border-left: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column;
+}
+.sidebar.open { right: 0; box-shadow: -50px 0 100px rgba(0,0,0,0.8); }
+
+.sb-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+.sb-title { font-family: var(--font-tech); font-size: 16px; color: var(--accent); letter-spacing: 2px; }
+
+.sb-content { flex-grow: 1; overflow-y: auto; padding: 20px; }
+.sb-content::-webkit-scrollbar { width: 5px; }
+.sb-content::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+details { margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.2); }
+summary { padding: 12px 15px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #ccc; transition: 0.2s; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+summary:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+summary::after { content: '+'; font-size: 14px; }
+details[open] summary::after { content: '-'; color: var(--accent); }
+details[open] summary { border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--accent); }
+
+.control-group { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #888; }
+
+/* Inputs */
+input[type="text"], input[type="url"], select { background: #111; border: 1px solid #333; color: white; padding: 8px 10px; border-radius: 4px; font-size: 11px; width: 100%; margin-top: 5px; font-family: var(--font-main); }
+input:focus { border-color: var(--accent); }
+input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: #333; border-radius: 2px; margin: 10px 0; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; transition: 0.2s; }
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+input[type="color"] { width: 40px; height: 25px; border: none; background: none; cursor: pointer; }
+
+.btn { background: #111; border: 1px solid #333; color: #ccc; padding: 8px; border-radius: 4px; font-size: 10px; cursor: pointer; transition: 0.2s; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+.btn:hover { border-color: var(--accent); color: var(--text); background: rgba(255,255,255,0.05); }
+.btn-danger { color: #ff4444; border-color: #331111; }
+.btn-danger:hover { background: #331111; border-color: #ff4444; }
+.btn-action { background: var(--accent); color: #000; border: none; font-weight: 700; }
+.btn-action:hover { background: #fff; box-shadow: 0 0 15px var(--accent); }
+
+/* Panic Overlay */
+#panicOverlay { position: fixed; inset: 0; background: #fff; z-index: 99999; display: none; align-items: center; justify-content: center; color: #000; font-family: serif; }
+#fakeError { position: fixed; inset: 0; background: #0000aa; color: #fff; font-family: monospace; z-index: 99999; display: none; padding: 50px; font-size: 20px; line-height: 1.5; }
 </style>
 </head>
-<body onclick="closeSidebar(event)">
+<body class="custom-cursor">
 
-<div id="cursor"></div>
+<div id="cursor"><div class="dot"></div><div class="ring"></div></div>
+<div class="vignette"></div>
+<div class="scanline"></div>
 <canvas id="particleCanvas"></canvas>
 
+<div id="panicOverlay">
+<div style="text-align:center;">
+<h1>Connection Error</h1>
+<p>Unable to connect to the proxy server.</p>
+</div>
+</div>
+<div id="fakeError">
+<p>A fatal exception 0E has occurred at 0028:C0034B23. The current application will be terminated.</p>
+<p>* Press any key to terminate the current application.</p>
+<p>* Press CTRL+ALT+DEL again to restart your computer.</p>
+</div>
+
 <div class="tab-bar">
-<button class="tab active" onclick="switchTab('home', this)">HUB</button>
-<button class="tab" onclick="switchTab('browser', this)">BROWSER</button>
-<button class="tab" onclick="switchTab('media', this)">SPOTIFY</button>
+<button class="tab active" onclick="app.switchTab('home', this)">HUB</button>
+<button class="tab" onclick="app.switchTab('media', this)">MEDIA</button>
 </div>
 
-<div style="position:fixed; right:30px; top:15px; z-index:1000; display:flex; align-items:center; gap:15px;">
-<div id="clock" style="font-family: monospace; font-size: 12px; color: var(--accent);">00:00:00</div>
-<i class="fas fa-bars-staggered" onclick="event.stopPropagation(); document.getElementById('sidebar').classList.toggle('open')" style="cursor:pointer; color: var(--accent); font-size: 18px;"></i>
+<div class="widget-area">
+<div id="clock" class="clock">00:00</div>
+<div id="date" class="date">LOADING...</div>
+<div id="sysStat" class="sys-stat">CPU: 12% | RAM: 4.2GB</div>
 </div>
 
-<div id="home" class="view active"><div class="grid" id="grid"></div></div>
-
-<div id="browser" class="view">
-<div class="window-frame">
-<iframe id="browserFrame" src="https://duckduckgo.com/search?q=Nexora+Hub&kae=d"></iframe>
+<div id="home" class="view active">
+<div class="grid-container">
+<div class="grid" id="grid"></div>
 </div>
+<div style="margin-top: 10px; opacity: 0.5; font-size: 10px;">Right Sidebar > Grid > Edit Mode to manage links</div>
 </div>
 
 <div id="media" class="view">
-<div class="window-frame" style="max-width: 900px; height: 600px;">
-<iframe src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM3M" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+<div class="window-frame">
+<iframe id="spotifyFrame" src="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+<div class="media-bar">
+<input type="text" id="mediaInput" placeholder="Paste Spotify/YouTube Embed URL..." style="margin:0;">
+<button class="btn btn-action" style="width: auto; margin:0;" onclick="app.loadMedia()">PLAY</button>
+</div>
 </div>
 </div>
 
+<i class="fas fa-cog sidebar-btn" onclick="document.getElementById('sidebar').classList.add('open')"></i>
+
 <aside class="sidebar" id="sidebar">
-<h2 style="font-family: Orbitron; font-size: 18px;">ELITE SETTINGS</h2>
-<div class="section">
-<span class="label">Cloak Identity</span>
-<input type="text" id="nameIn" placeholder="Fake Site Title" onchange="saveSet()">
-<input type="text" id="iconIn" placeholder="Fake Favicon URL" onchange="saveSet()">
+<div class="sb-header">
+<span class="sb-title">NEXORA // ULT</span>
+<i class="fas fa-times" style="cursor:pointer; color:#666;" onclick="document.getElementById('sidebar').classList.remove('open')"></i>
 </div>
-<div class="section">
-<span class="label">Particle Customizer</span>
-<input type="text" id="emojiIn" placeholder="Enter Emoji(s)" oninput="updateParticles()">
-<div style="margin-top:10px;">
-<span class="label">Or Particle Image</span>
-<input type="file" accept="image/*" onchange="setPartImg(this)">
+
+<div class="sb-content">
+<details open>
+<summary>Global Theme</summary>
+<div class="control-group">
+<select id="presetSel" onchange="app.loadPreset(this.value)">
+<option value="custom">Custom</option>
+<option value="cyberpunk">Cyberpunk (Default)</option>
+<option value="neon">Neon Night</option>
+<option value="minimal">Minimalist</option>
+<option value="matrix">The Matrix</option>
+<option value="amoled">Deep Dark</option>
+</select>
 </div>
-<div style="margin-top:10px;">
-<span class="label">Count: <span id="countVal">50</span></span>
-<input type="range" id="partCount" min="5" max="150" value="50" oninput="document.getElementById('countVal').innerText=this.value; updateParticles()">
+</details>
+
+<details>
+<summary>Grid Management</summary>
+<div class="control-group">
+<div class="row">
+<span>Edit Mode (Show Delete)</span>
+<input type="checkbox" id="editModeCheck" onchange="app.toggleEditMode(this.checked)">
+</div>
+<hr style="border:0; border-top:1px solid #333; width:100%;">
+<input type="text" id="newTitle" placeholder="Title (e.g. YouTube)">
+<input type="url" id="newUrl" placeholder="URL (https://...)">
+<button class="btn btn-action" onclick="app.addLink()">ADD LINK</button>
+
+<div style="margin-top:15px;">
+<span class="row">Columns: <span id="colVal">5</span></span>
+<input type="range" min="2" max="8" value="5" oninput="app.setCSS('--grid-cols', this.value); document.getElementById('colVal').innerText=this.value; app.save('gridCols', this.value)">
 </div>
 </div>
-<div class="section">
-<span class="label">Visuals</span>
-<div style="display:flex; justify-content:space-between; align-items:center;">
-Accent <input type="color" id="accPick" style="width:50px" onchange="updAccent(this.value)">
+</details>
+
+<details>
+<summary>Visuals & UI</summary>
+<div class="control-group">
+<div class="row">
+<span>Accent Color</span>
+<input type="color" id="accentPick" onchange="app.setAccent(this.value)">
 </div>
-<span class="label" style="margin-top:10px;">Wallpaper</span>
-<input type="file" accept="image/*" onchange="updBg(this)">
+<div class="row">
+<span>Background Blur</span>
+<input type="range" min="0" max="50" oninput="app.setCSS('--glass-blur', this.value+'px'); app.save('blur', this.value)">
 </div>
-<button class="btn" style="color:#ff4444; border-color:#ff4444;" onclick="if(confirm('Reset all settings?')){localStorage.clear(); location.reload();}">FACTORY RESET</button>
+<div class="row">
+<span>Scanlines</span>
+<input type="checkbox" onchange="document.querySelector('.scanline').classList.toggle('active', this.checked); app.save('scanline', this.checked)">
+</div>
+<span style="font-size:10px; color:#888; margin-top:5px;">Wallpaper URL</span>
+<input type="text" onchange="document.body.style.backgroundImage=`url('${this.value}')`; app.save('bg', this.value)">
+</div>
+</details>
+
+<details>
+<summary>Particle System</summary>
+<div class="control-group">
+<div class="row"><span>Count</span> <input type="number" id="pCount" value="50" style="width:50px" onchange="particles.init()"></div>
+<div class="row"><span>Speed</span> <input type="range" min="1" max="10" value="2" oninput="particles.speedMultiplier = this.value/2"></div>
+<div class="row"><span>Connect Lines</span> <input type="checkbox" id="pLine" onchange="particles.init()"></div>
+<div class="row"><span>Mouse React</span> <input type="checkbox" id="pReact" checked></div>
+<select id="pShape" onchange="particles.init()">
+<option value="circle">Circle</option>
+<option value="square">Square</option>
+<option value="triangle">Triangle</option>
+<option value="char">Matrix Text</option>
+</select>
+</div>
+</details>
+
+<details>
+<summary>Stealth & Cloak</summary>
+<div class="control-group">
+<select onchange="app.setCloak(this.value)">
+<option value="">-- Quick Cloak --</option>
+<option value="google">Google Classroom</option>
+<option value="canvas">Canvas LMS</option>
+<option value="docs">Google Docs</option>
+<option value="drive">Google Drive</option>
+</select>
+<div class="row">
+<span>Panic Button (F9)</span>
+<input type="checkbox" id="panicCheck" checked onchange="app.save('panic', this.checked)">
+</div>
+<div class="row">
+<span>Panic Action</span>
+<select id="panicType" style="width:60%" onchange="app.save('panicType', this.value)">
+<option value="blank">White Screen</option>
+<option value="error">Fake BSOD</option>
+<option value="google">Redirect Google</option>
+</select>
+</div>
+</div>
+</details>
+
+<details>
+<summary>System & Data</summary>
+<div class="control-group">
+<div class="row"><span>Fake Sys Stats</span> <input type="checkbox" onchange="document.getElementById('sysStat').style.display = this.checked ? 'block' : 'none'; app.save('sysStats', this.checked)"></div>
+<div class="row"><span>24h Clock</span> <input type="checkbox" id="clk24" onchange="app.save('clk24', this.checked)"></div>
+<button class="btn" onclick="app.exportSettings()">Export Config (JSON)</button>
+<button class="btn" onclick="document.getElementById('impFile').click()">Import Config</button>
+<input type="file" id="impFile" style="display:none" onchange="app.importSettings(this)">
+<button class="btn btn-danger" onclick="if(confirm('Wipe everything?')) { localStorage.clear(); location.reload(); }">FACTORY RESET</button>
+</div>
+</details>
+</div>
 </aside>
 
 <script>
-const links = [
-{ n: "Nexora", u: "https://mathematicss.global.ssl.fastly.net" }, { n: "Luminal", u: "https://sciencea.global.ssl.fastly.net" },
-{ n: "Hideout", u: "https://artsuplies.global.ssl.fastly.net" }, { n: "Holy Tuna", u: "https://fishingsuplies.global.ssl.fastly.net" },
-{ n: "Noah Hub", u: "https://memeresetaintgonnawork.global.ssl.fastly.net" }, { n: "Velara", u: "https://t2026soon.global.ssl.fastly.net" },
-{ n: "Strongdog", u: "https://spanishtranslator.global.ssl.fastly.net" }, { n: "Movies", u: "https://mrbeastisrich.global.ssl.fastly.net" },
-{ n: "Petezah", u: "https://AAbattery.global.ssl.fastly.net" }, { n: "Roblox", u: "https://our-ddddd.global.ssl.fastly.net" },
-{ n: "Froggie", u: "https://froggie.global.ssl.fastly.net" }, { n: "Interstellar", u: "https://interstellar.global.ssl.fastly.net" },
-{ n: "Utopia", u: "https://utopia.global.ssl.fastly.net" }, { n: "Shadow", u: "https://shadow.global.ssl.fastly.net" },
-{ n: "Nebula", u: "https://nebula.global.ssl.fastly.net" }, { n: "Zenith", u: "https://zenith.global.ssl.fastly.net" }
-];
+/**
+* NEXORA ULTIMATE CORE
+* Handles Settings, Grid, Stealth, and Utils
+*/
+const app = {
+data: {
+links: [
+{ t: "Nexora", u: "https://mathematicss.global.ssl.fastly.net" },
+{ t: "Luminal", u: "https://sciencea.global.ssl.fastly.net" },
+{ t: "Hideout", u: "https://artsuplies.global.ssl.fastly.net" },
+{ t: "Google", u: "https://google.com" }
+],
+settings: {}
+},
 
-let pImg = null, particles = [], cvs, ctx;
+init: function() {
+this.loadSettings();
+this.renderGrid();
+this.startClock();
+this.initCursor();
+particles.init();
 
-window.onload = () => {
-cvs = document.getElementById('particleCanvas');
-ctx = cvs.getContext('2d');
-resize();
-renderGrid();
-initClock();
-initCursor();
-loadSettings();
-updateParticles();
-requestAnimationFrame(loop);
+// Keyboard Shortcuts
+document.addEventListener('keydown', (e) => {
+if (e.key === 'F9' && document.getElementById('panicCheck').checked) this.triggerPanic();
+if (e.key === 'Escape') this.clearPanic();
+});
+},
+
+// --- GRID SYSTEM ---
+renderGrid: function() {
+const el = document.getElementById('grid');
+el.innerHTML = '';
+this.data.links.forEach((l, i) => {
+const box = document.createElement('div');
+box.className = 'box';
+// Check if URL is clicked or Delete is clicked
+box.onclick = (e) => {
+if(e.target.classList.contains('del-btn')) {
+this.deleteLink(i);
+} else {
+window.open(l.u, '_blank');
+}
 };
 
-window.onresize = resize;
-function resize() { if(cvs) { cvs.width = window.innerWidth; cvs.height = window.innerHeight; } }
+// Icon logic (simple auto-detection)
+let icon = 'fa-globe';
+if(l.u.includes('youtube')) icon = 'fa-youtube';
+else if(l.u.includes('discord')) icon = 'fa-discord';
+else if(l.u.includes('github')) icon = 'fa-github';
+else if(l.u.includes('spotify')) icon = 'fa-spotify';
 
-function switchTab(id, el) {
+box.innerHTML = `
+<div class="del-btn"><i class="fas fa-trash"></i></div>
+<i class="fab ${icon} fas"></i>
+<span>${l.t}</span>
+`;
+el.appendChild(box);
+});
+},
+
+addLink: function() {
+const t = document.getElementById('newTitle').value;
+const u = document.getElementById('newUrl').value;
+if(t && u) {
+this.data.links.push({t, u});
+this.saveLinks();
+this.renderGrid();
+document.getElementById('newTitle').value = '';
+document.getElementById('newUrl').value = '';
+}
+},
+
+deleteLink: function(index) {
+if(confirm('Delete this link?')) {
+this.data.links.splice(index, 1);
+this.saveLinks();
+this.renderGrid();
+}
+},
+
+toggleEditMode: function(active) {
+const btns = document.querySelectorAll('.del-btn');
+btns.forEach(b => b.style.display = active ? 'block' : 'none'); // Simple CSS toggle could work too
+// Actually relying on CSS hover opacity, but let's make it permanent if checked
+const style = document.getElementById('editStyle') || document.createElement('style');
+style.id = 'editStyle';
+style.innerHTML = active ? '.del-btn { opacity: 1 !important; }' : '';
+document.head.appendChild(style);
+},
+
+// --- SETTINGS & STATE ---
+saveLinks: function() { localStorage.setItem('nx_links', JSON.stringify(this.data.links)); },
+
+save: function(key, val) {
+this.data.settings[key] = val;
+localStorage.setItem('nx_settings', JSON.stringify(this.data.settings));
+},
+
+loadSettings: function() {
+// Load Links
+const l = localStorage.getItem('nx_links');
+if(l) this.data.links = JSON.parse(l);
+
+// Load Settings
+const s = localStorage.getItem('nx_settings');
+if(s) this.data.settings = JSON.parse(s);
+
+// Apply Settings
+const set = this.data.settings;
+if(set.bg) document.body.style.backgroundImage = `url('${set.bg}')`;
+if(set.accent) this.setAccent(set.accent);
+if(set.blur) this.setCSS('--glass-blur', set.blur+'px');
+if(set.gridCols) this.setCSS('--grid-cols', set.gridCols);
+if(set.scanline) document.querySelector('.scanline').classList.add('active');
+if(set.sysStats) document.getElementById('sysStat').style.display = 'block';
+},
+
+exportSettings: function() {
+const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.data));
+const a = document.createElement('a');
+a.href = data; a.download = 'nexora_config.json'; a.click();
+},
+
+importSettings: function(input) {
+const reader = new FileReader();
+reader.onload = (e) => {
+const d = JSON.parse(e.target.result);
+localStorage.setItem('nx_links', JSON.stringify(d.links));
+localStorage.setItem('nx_settings', JSON.stringify(d.settings));
+location.reload();
+};
+reader.readAsText(input.files[0]);
+},
+
+// --- UI HELPERS ---
+switchTab: function(id, btn) {
 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
 document.getElementById(id).classList.add('active');
-el.classList.add('active');
-}
+btn.classList.add('active');
+},
 
-function renderGrid() {
-const g = document.getElementById('grid');
-links.forEach(l => {
-const b = document.createElement('a');
-b.className = 'box'; b.href = l.u; b.target = "_blank";
-b.innerHTML = `<span>${l.n}</span>`;
-g.appendChild(b);
-});
-}
+setCSS: function(k, v) { document.documentElement.style.setProperty(k, v); },
 
-function updateParticles() {
-const count = parseInt(document.getElementById('partCount').value);
-const emoji = document.getElementById('emojiIn').value || '•';
-particles = Array.from({length: count}, () => ({
-x: Math.random() * window.innerWidth,
-y: Math.random() * window.innerHeight,
-vx: (Math.random() - 0.5) * 1.5,
-vy: (Math.random() - 0.5) * 1.5,
-size: Math.random() * 15 + 10,
-emoji: emoji
-}));
-localStorage.setItem('nx_emoji', emoji);
-localStorage.setItem('nx_pcount', count);
-}
+setAccent: function(c) {
+this.setCSS('--accent', c);
+this.setCSS('--glow', `0 0 20px ${c}44`);
+this.save('accent', c);
+},
 
-function setPartImg(input) {
-if(input.files[0]) {
-const r = new FileReader();
-r.onload = (e) => {
-const tempImg = new Image();
-tempImg.onload = () => { pImg = tempImg; localStorage.setItem('nx_pimg', e.target.result); };
-tempImg.src = e.target.result;
+loadPreset: function(type) {
+if(type === 'cyberpunk') {
+this.setAccent('#00f2ff'); this.setCSS('--bg', '#030303');
+document.getElementById('pShape').value = 'circle';
+} else if (type === 'neon') {
+this.setAccent('#ff00ff'); this.setCSS('--bg', '#0a000a');
+this.setCSS('--glass-blur', '20px');
+} else if (type === 'minimal') {
+this.setAccent('#ffffff'); this.setCSS('--bg', '#111');
+this.setCSS('--glass-blur', '0px');
+document.getElementById('pCount').value = 0;
+} else if (type === 'matrix') {
+this.setAccent('#00ff00'); this.setCSS('--bg', '#000');
+document.getElementById('pShape').value = 'char';
+}
+particles.init();
+},
+
+// --- STEALTH ---
+setCloak: function(type) {
+const icons = {
+google: "https://ssl.gstatic.com/classroom/favicon.png",
+canvas: "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico",
+docs: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico",
+drive: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png"
 };
-r.readAsDataURL(input.files[0]);
-}
-}
+const titles = { google: "Classes", canvas: "Dashboard", docs: "My Essay", drive: "My Drive" };
 
-function loop() {
-ctx.clearRect(0, 0, cvs.width, cvs.height);
-const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-ctx.fillStyle = accent;
-
-particles.forEach(p => {
-p.x += p.vx; p.y += p.vy;
-if(p.x < -20) p.x = cvs.width + 20; if(p.x > cvs.width + 20) p.x = -20;
-if(p.y < -20) p.y = cvs.height + 20; if(p.y > cvs.height + 20) p.y = -20;
-
-if(pImg && pImg.complete) {
-ctx.globalAlpha = 0.5;
-ctx.drawImage(pImg, p.x, p.y, p.size, p.size);
-} else {
-ctx.globalAlpha = 0.4;
-ctx.font = `${p.size}px Arial`;
-ctx.fillText(p.emoji, p.x, p.y);
+if(titles[type]) {
+document.title = titles[type];
+document.getElementById('siteIcon').href = icons[type];
 }
-});
-requestAnimationFrame(loop);
-}
+},
 
-function updAccent(c) {
-document.documentElement.style.setProperty('--accent', c);
-document.documentElement.style.setProperty('--glow', c+'44');
-localStorage.setItem('nx_acc', c);
-}
+triggerPanic: function() {
+const type = document.getElementById('panicType').value;
+if(type === 'blank') document.getElementById('panicOverlay').style.display = 'flex';
+else if(type === 'error') document.getElementById('fakeError').style.display = 'block';
+else if(type === 'google') window.location.href = "https://google.com";
+},
 
-function updBg(i) {
-if(i.files[0]) {
-const r = new FileReader();
-r.onload = (e) => {
-try {
-document.body.style.backgroundImage = `url(${e.target.result})`;
-localStorage.setItem('nx_bg', e.target.result);
-} catch(err) { alert("Image too large for memory. Use a smaller file."); }
+clearPanic: function() {
+document.getElementById('panicOverlay').style.display = 'none';
+document.getElementById('fakeError').style.display = 'none';
+},
+
+// --- MEDIA ---
+loadMedia: function() {
+let url = document.getElementById('mediaInput').value;
+if(url.includes('spotify.com') && !url.includes('/embed')) {
+url = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
+} else if (url.includes('youtube.com/watch')) {
+const vid = url.split('v=')[1];
+url = `https://www.youtube.com/embed/${vid}`;
+}
+document.getElementById('spotifyFrame').src = url;
+},
+
+// --- WIDGETS ---
+startClock: function() {
+const update = () => {
+const now = new Date();
+const is24 = document.getElementById('clk24').checked;
+document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: !is24});
+document.getElementById('date').innerText = now.toLocaleDateString([], {weekday: 'short', month: 'short', day: 'numeric'});
+
+// Fake Sys Stats Randomizer
+if(Math.random() > 0.5) {
+const cpu = Math.floor(Math.random() * 30) + 5;
+const ram = (Math.random() * 2 + 3).toFixed(1);
+document.getElementById('sysStat').innerText = `CPU: ${cpu}% | RAM: ${ram}GB`;
+}
 };
-r.readAsDataURL(i.files[0]);
-}
-}
+setInterval(update, 1000);
+update();
+},
 
-function saveSet() {
-const n = document.getElementById('nameIn').value, i = document.getElementById('iconIn').value;
-if(n) { document.title = n; localStorage.setItem('nx_name', n); }
-if(i) { document.getElementById('siteIcon').href = i; localStorage.setItem('nx_icon', i); }
-}
-
-function loadSettings() {
-const bg = localStorage.getItem('nx_bg'), name = localStorage.getItem('nx_name'),
-icon = localStorage.getItem('nx_icon'), acc = localStorage.getItem('nx_acc'),
-emo = localStorage.getItem('nx_emoji'), cnt = localStorage.getItem('nx_pcount'),
-pimg = localStorage.getItem('nx_pimg');
-if(bg) document.body.style.backgroundImage = `url(${bg})`;
-if(name) { document.title = name; document.getElementById('nameIn').value = name; }
-if(icon) { document.getElementById('siteIcon').href = icon; document.getElementById('iconIn').value = icon; }
-if(acc) updAccent(acc);
-if(emo) document.getElementById('emojiIn').value = emo;
-if(cnt) { document.getElementById('partCount').value = cnt; document.getElementById('countVal').innerText = cnt; }
-if(pimg) { pImg = new Image(); pImg.src = pimg; }
-}
-
-function initClock() { setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000); }
-function initCursor() {
+initCursor: function() {
 const c = document.getElementById('cursor');
 window.onmousemove = e => {
+if(document.body.classList.contains('custom-cursor')) {
 c.style.left = e.clientX + 'px';
 c.style.top = e.clientY + 'px';
-
+c.classList.add('active');
+}
 };
 }
-function closeSidebar(e) { if(!document.getElementById('sidebar').contains(e.target)) document.getElementById('sidebar').classList.remove('open'); }
+};
+
+/**
+* ADVANCED PARTICLE ENGINE
+* Supports shapes, connections, mouse interaction
+*/
+const particles = {
+ctx: null, cvs: null, array: [], speedMultiplier: 1,
+init: function() {
+this.cvs = document.getElementById('particleCanvas');
+this.ctx = this.cvs.getContext('2d');
+this.cvs.width = window.innerWidth;
+this.cvs.height = window.innerHeight;
+
+const count = document.getElementById('pCount').value;
+const shape = document.getElementById('pShape').value;
+this.array = [];
+
+for(let i=0; i<count; i++) {
+this.array.push({
+x: Math.random() * this.cvs.width,
+y: Math.random() * this.cvs.height,
+vx: (Math.random() - 0.5) * 2,
+vy: (Math.random() - 0.5) * 2,
+size: Math.random() * 3 + 1,
+shape: shape,
+char: String.fromCharCode(0x30A0 + Math.random() * 96) // Matrix Katakana
+});
+}
+},
+
+draw: function() {
+const ctx = this.ctx;
+ctx.clearRect(0, 0, this.cvs.width, this.cvs.height);
+const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+const connect = document.getElementById('pLine').checked;
+const react = document.getElementById('pReact').checked;
+
+ctx.fillStyle = accent;
+ctx.strokeStyle = accent;
+
+this.array.forEach((p, i) => {
+// Move
+p.x += p.vx * this.speedMultiplier;
+p.y += p.vy * this.speedMultiplier;
+
+// Matrix rain effect override
+if(p.shape === 'char') {
+p.vx = 0; p.vy = Math.random() * 5 + 2;
+}
+
+// Wrap
+if(p.x < 0) p.x = this.cvs.width; if(p.x > this.cvs.width) p.x = 0;
+if(p.y < 0) p.y = this.cvs.height; if(p.y > this.cvs.height) p.y = 0;
+
+// Draw Shape
+ctx.beginPath();
+if(p.shape === 'circle') ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+else if (p.shape === 'square') ctx.rect(p.x, p.y, p.size*2, p.size*2);
+else if (p.shape === 'triangle') {
+ctx.moveTo(p.x, p.y); ctx.lineTo(p.x+5, p.y+10); ctx.lineTo(p.x-5, p.y+10);
+}
+else if (p.shape === 'char') {
+ctx.font = '14px monospace'; ctx.fillText(p.char, p.x, p.y);
+if(Math.random() > 0.95) p.char = String.fromCharCode(0x30A0 + Math.random() * 96);
+}
+
+if(p.shape !== 'char') ctx.fill();
+
+// Connections
+if(connect) {
+this.array.forEach((p2, j) => {
+if(i === j) return;
+const dx = p.x - p2.x, dy = p.y - p2.y;
+const dist = Math.sqrt(dx*dx + dy*dy);
+if(dist < 100) {
+ctx.globalAlpha = 1 - (dist/100);
+ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+ctx.globalAlpha = 1;
+}
+});
+}
+});
+requestAnimationFrame(this.draw.bind(this));
+}
+};
+
+// Initialize
+window.onload = () => { app.init(); particles.draw(); };
+window.onresize = () => particles.init();
+
 </script>
 </body>
 </html>
