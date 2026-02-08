@@ -3,136 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="siteTitle">Nexora Hub | Elite</title>
+<title id="siteTitle">Nexora Hub | Ultimate</title>
 <link id="siteIcon" rel="icon" href="https://www.google.com/favicon.ico">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 :root {
 --bg: #030303;
 --accent: #00f2ff;
 --sec-accent: #ff0055;
 --text: #ffffff;
---panel-bg: rgba(5,5,5,0.95);
+--panel-bg: rgba(5,5,5,0.85);
 --glow: 0 0 20px rgba(0, 242, 255, 0.3);
---box-size: 120px;
+--box-size: 130px;
 --grid-gap: 20px;
---glass-blur: 10px;
+--glass-blur: 12px;
 --cursor-size: 10px;
 --grid-cols: 5;
---radius: 12px;
+--radius: 16px;
 --font-main: 'Plus Jakarta Sans', sans-serif;
 --font-tech: 'Orbitron', monospace;
+--font-mono: 'JetBrains Mono', monospace;
 }
 
-/* Core Reset & Body */
-* { box-sizing: border-box; outline: none; user-select: none; }
+/* Core */
+* { box-sizing: border-box; outline: none; user-select: none; scrollbar-width: thin; scrollbar-color: var(--accent) #111; }
 body {
 margin: 0; height: 100vh; background: var(--bg); color: var(--text);
 font-family: var(--font-main); overflow: hidden;
 background-size: cover; background-position: center; transition: background 0.5s;
 }
 
-/* Cursors */
+/* Custom Cursor */
 body.custom-cursor * { cursor: none !important; }
-#cursor { position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); display: none; }
-#cursor.active { display: block; }
-#cursor .dot { width: var(--cursor-size); height: var(--cursor-size); background: var(--accent); border-radius: 50%; box-shadow: var(--glow); transition: transform 0.1s; }
-#cursor .ring { position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); width: calc(var(--cursor-size) * 3); height: calc(var(--cursor-size) * 3); border: 1px solid var(--accent); border-radius: 50%; opacity: 0.5; transition: 0.2s; }
-body:active #cursor .ring { transform: translate(-50%, -50%) scale(0.8); }
+#cursor { position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); mix-blend-mode: difference; }
+#cursor .dot { width: var(--cursor-size); height: var(--cursor-size); background: var(--accent); border-radius: 50%; box-shadow: var(--glow); }
+#cursor .ring { position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); width: 40px; height: 40px; border: 1px solid var(--accent); border-radius: 50%; opacity: 0.5; transition: 0.1s; }
+body:active #cursor .ring { width: 20px; height: 20px; background: var(--accent); opacity: 0.2; }
 
-/* Background Effects */
+/* Effects */
 #particleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
-.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(circle, transparent 50%, black 150%); }
+.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(circle, transparent 40%, black 140%); }
 .scanline { position: fixed; inset: 0; z-index: 9000; pointer-events: none; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; display: none; }
 .scanline.active { display: block; }
 
-/* UI Components */
-.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; padding: 12px 20px; z-index: 100; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); border-radius: 0 0 20px 20px; border: 1px solid rgba(255,255,255,0.1); border-top: none; }
-.tab { padding: 8px 25px; border-radius: 8px; font-family: var(--font-tech); font-size: 11px; color: #888; transition: 0.3s; cursor: pointer; border: 1px solid transparent; background: transparent; text-transform: uppercase; letter-spacing: 1px; }
+/* Navigation */
+.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; padding: 12px 25px; z-index: 100; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); border-radius: 0 0 25px 25px; border: 1px solid rgba(255,255,255,0.05); border-top: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.tab { padding: 8px 25px; border-radius: 20px; font-family: var(--font-tech); font-size: 10px; color: #888; transition: 0.3s; cursor: pointer; border: 1px solid transparent; background: transparent; text-transform: uppercase; letter-spacing: 2px; }
 .tab:hover { color: #fff; }
 .tab.active { color: var(--accent); background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); box-shadow: var(--glow); }
 
 /* Views */
-.view { position: absolute; inset: 0; display: none; padding-top: 80px; z-index: 10; flex-direction: column; align-items: center; }
+.view { position: absolute; inset: 0; display: none; padding-top: 100px; z-index: 10; flex-direction: column; align-items: center; }
 .view.active { display: flex; animation: fadeUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Grid System */
-.grid-container { overflow-y: auto; max-height: 85vh; width: 100%; display: flex; justify-content: center; padding-bottom: 50px; }
+/* Search Bar */
+.search-container { position: relative; margin-bottom: 20px; width: 400px; max-width: 90%; z-index: 20; }
+.search-bar { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); padding: 12px 40px; border-radius: 30px; color: white; font-family: var(--font-mono); font-size: 12px; backdrop-filter: blur(10px); transition: 0.3s; }
+.search-bar:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--glow); width: 100%; }
+.search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666; font-size: 12px; }
+
+/* Grid */
+.grid-container { overflow-y: auto; max-height: 80vh; width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 50px; }
 .grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: var(--grid-gap); padding: 20px; }
+
 .box {
 position: relative; width: var(--box-size); height: var(--box-size);
 background: rgba(255,255,255,0.03); backdrop-filter: blur(var(--glass-blur));
-border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius);
 display: flex; flex-direction: column; justify-content: center; align-items: center;
 text-decoration: none; transition: 0.3s; overflow: hidden;
 }
-.box:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: var(--glow); background: rgba(255,255,255,0.08); z-index: 20; }
-.box i { font-size: 24px; color: #ccc; margin-bottom: 10px; transition: 0.3s; }
-.box:hover i { color: var(--accent); transform: scale(1.1); }
-.box span { font-size: 10px; font-weight: 600; letter-spacing: 1px; color: #fff; text-align: center; font-family: var(--font-main); }
-.box .del-btn { position: absolute; top: 5px; right: 5px; color: #ff4444; font-size: 12px; padding: 5px; opacity: 0; transition: 0.2s; cursor: pointer; }
-.box:hover .del-btn { opacity: 1; }
+.box:hover { border-color: var(--accent); transform: translateY(-5px) scale(1.02); box-shadow: var(--glow); background: rgba(255,255,255,0.08); }
+.box i { font-size: 28px; color: #ccc; margin-bottom: 15px; transition: 0.3s; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
+.box:hover i { color: var(--accent); transform: scale(1.1); filter: drop-shadow(0 0 8px var(--accent)); }
+.box span { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: #fff; text-align: center; opacity: 0.8; }
 
-/* Media Player */
-.window-frame { width: 90%; max-width: 1000px; height: 70vh; border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display:flex; flex-direction: column; position: relative; }
-iframe { width: 100%; height: 100%; border: none; background: #000; flex-grow: 1; }
-.media-bar { padding: 15px; background: #080808; border-top: 1px solid #222; display: flex; gap: 10px; }
+/* Widgets Area */
+.widget-area { position: fixed; top: 20px; right: 30px; text-align: right; z-index: 50; display: flex; flex-direction: column; gap: 2px; pointer-events: none; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+.clock { font-family: var(--font-tech); font-size: 32px; color: var(--text); font-weight: 700; letter-spacing: 1px; }
+.date { font-size: 11px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; }
+.greeting { font-family: var(--font-main); font-size: 14px; color: #ccc; font-weight: 300; }
+.sys-stat { font-family: var(--font-mono); font-size: 10px; color: var(--sec-accent); margin-top: 5px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 4px; display: inline-block; border: 1px solid rgba(255,255,255,0.1); }
 
-/* Widgets Overlay */
-.widget-area { position: fixed; top: 20px; right: 20px; text-align: right; z-index: 50; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
-.clock { font-family: var(--font-tech); font-size: 24px; color: var(--text); text-shadow: 0 0 10px var(--accent); font-weight: 700; }
-.date { font-size: 11px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
-.sys-stat { font-family: monospace; font-size: 10px; color: var(--sec-accent); margin-top: 5px; display: none; }
-
-/* Sidebar Settings */
-.sidebar-btn { position: fixed; bottom: 20px; right: 20px; z-index: 200; font-size: 20px; color: var(--text); background: rgba(0,0,0,0.5); padding: 15px; border-radius: 50%; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
-.sidebar-btn:hover { color: var(--accent); border-color: var(--accent); transform: rotate(90deg); }
+/* Sidebar */
+.sidebar-btn { position: fixed; bottom: 25px; right: 25px; z-index: 200; font-size: 18px; color: var(--text); background: rgba(20,20,20,0.6); padding: 15px; border-radius: 50%; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.sidebar-btn:hover { color: var(--accent); border-color: var(--accent); transform: rotate(180deg); box-shadow: 0 0 20px var(--glow); }
 
 .sidebar {
-position: fixed; top: 0; right: -450px; width: 400px; height: 100%;
+position: fixed; top: 0; right: -420px; width: 380px; height: 100%;
 background: var(--panel-bg); backdrop-filter: blur(40px); z-index: 5000;
-padding: 0; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+padding: 0; transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 border-left: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column;
 }
 .sidebar.open { right: 0; box-shadow: -50px 0 100px rgba(0,0,0,0.8); }
 
-.sb-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
-.sb-title { font-family: var(--font-tech); font-size: 16px; color: var(--accent); letter-spacing: 2px; }
+.sb-header { padding: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); }
+.sb-title { font-family: var(--font-tech); font-size: 18px; color: var(--accent); letter-spacing: 3px; }
+.sb-content { flex-grow: 1; overflow-y: auto; padding: 25px; }
 
-.sb-content { flex-grow: 1; overflow-y: auto; padding: 20px; }
-.sb-content::-webkit-scrollbar { width: 5px; }
-.sb-content::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+details { margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.3); transition: 0.3s; }
+details[open] { border-color: var(--accent); background: rgba(0,0,0,0.6); }
+summary { padding: 15px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #ccc; transition: 0.2s; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+summary:hover { color: #fff; background: rgba(255,255,255,0.03); }
 
-details { margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.2); }
-summary { padding: 12px 15px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #ccc; transition: 0.2s; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-summary:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-summary::after { content: '+'; font-size: 14px; }
-details[open] summary::after { content: '-'; color: var(--accent); }
-details[open] summary { border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--accent); }
+.control-group { padding: 15px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+.row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #999; }
 
-.control-group { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-.row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #888; }
+/* Inputs & Buttons */
+input, select, .btn { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 6px; font-size: 11px; width: 100%; margin-top: 5px; font-family: var(--font-main); transition: 0.2s; }
+input:focus, select:focus { border-color: var(--accent); }
+.btn { cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; text-align: center; }
+.btn:hover { background: #222; border-color: var(--accent); color: var(--accent); }
+.btn-red { color: #ff5555; border-color: #552222; }
+.btn-red:hover { background: #331111; border-color: #ff5555; }
 
-/* Inputs */
-input[type="text"], input[type="url"], select { background: #111; border: 1px solid #333; color: white; padding: 8px 10px; border-radius: 4px; font-size: 11px; width: 100%; margin-top: 5px; font-family: var(--font-main); }
-input:focus { border-color: var(--accent); }
-input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: #333; border-radius: 2px; margin: 10px 0; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; transition: 0.2s; }
-input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.3); }
-input[type="color"] { width: 40px; height: 25px; border: none; background: none; cursor: pointer; }
-
-.btn { background: #111; border: 1px solid #333; color: #ccc; padding: 8px; border-radius: 4px; font-size: 10px; cursor: pointer; transition: 0.2s; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-.btn:hover { border-color: var(--accent); color: var(--text); background: rgba(255,255,255,0.05); }
-.btn-danger { color: #ff4444; border-color: #331111; }
-.btn-danger:hover { background: #331111; border-color: #ff4444; }
-.btn-action { background: var(--accent); color: #000; border: none; font-weight: 700; }
-.btn-action:hover { background: #fff; box-shadow: 0 0 15px var(--accent); }
-
-/* Panic Overlay */
-#panicOverlay { position: fixed; inset: 0; background: #fff; z-index: 99999; display: none; align-items: center; justify-content: center; color: #000; font-family: serif; }
-#fakeError { position: fixed; inset: 0; background: #0000aa; color: #fff; font-family: monospace; z-index: 99999; display: none; padding: 50px; font-size: 20px; line-height: 1.5; }
+/* Media */
+.window-frame { width: 90%; max-width: 1000px; height: 70vh; border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; display:flex; flex-direction: column; }
+iframe { width: 100%; height: 100%; border: none; background: #000; flex-grow: 1; }
+.media-bar { padding: 15px; background: #080808; border-top: 1px solid #222; display: flex; gap: 10px; }
 </style>
 </head>
 <body class="custom-cursor">
@@ -142,300 +132,222 @@ input[type="color"] { width: 40px; height: 25px; border: none; background: none;
 <div class="scanline"></div>
 <canvas id="particleCanvas"></canvas>
 
-<div id="panicOverlay">
-<div style="text-align:center;">
-<h1>Connection Error</h1>
-<p>Unable to connect to the proxy server.</p>
-</div>
-</div>
-<div id="fakeError">
-<p>A fatal exception 0E has occurred at 0028:C0034B23. The current application will be terminated.</p>
-<p>* Press any key to terminate the current application.</p>
-<p>* Press CTRL+ALT+DEL again to restart your computer.</p>
-</div>
-
 <div class="tab-bar">
 <button class="tab active" onclick="app.switchTab('home', this)">HUB</button>
 <button class="tab" onclick="app.switchTab('media', this)">MEDIA</button>
 </div>
 
 <div class="widget-area">
-<div id="clock" class="clock">00:00</div>
-<div id="date" class="date">LOADING...</div>
-<div id="sysStat" class="sys-stat">CPU: 12% | RAM: 4.2GB</div>
+<div id="widgetClock" class="clock">00:00</div>
+<div id="widgetDate" class="date">LOADING...</div>
+<div id="widgetGreet" class="greeting">Welcome Back</div>
+<div id="widgetSys" class="sys-stat" style="display:none;">CPU: 12% RAM: 4GB</div>
 </div>
 
 <div id="home" class="view active">
+<div class="search-container">
+<i class="fas fa-terminal search-icon"></i>
+<input type="text" class="search-bar" placeholder="Terminal Search..." oninput="app.filterGrid(this.value)">
+</div>
 <div class="grid-container">
 <div class="grid" id="grid"></div>
 </div>
-<div style="margin-top: 10px; opacity: 0.5; font-size: 10px;">Right Sidebar > Grid > Edit Mode to manage links</div>
 </div>
 
 <div id="media" class="view">
 <div class="window-frame">
-<iframe id="spotifyFrame" src="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+<iframe id="mediaFrame" src="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
 <div class="media-bar">
-<input type="text" id="mediaInput" placeholder="Paste Spotify/YouTube Embed URL..." style="margin:0;">
-<button class="btn btn-action" style="width: auto; margin:0;" onclick="app.loadMedia()">PLAY</button>
+<input type="text" id="mediaInput" placeholder="Paste Spotify or YouTube Embed URL..." style="margin:0;">
+<button class="btn" style="width: auto; margin:0; border-color: var(--accent);" onclick="app.loadMedia()">LOAD</button>
 </div>
 </div>
 </div>
 
-<i class="fas fa-cog sidebar-btn" onclick="document.getElementById('sidebar').classList.add('open')"></i>
+<i class="fas fa-sliders-h sidebar-btn" onclick="document.getElementById('sidebar').classList.add('open')"></i>
 
 <aside class="sidebar" id="sidebar">
 <div class="sb-header">
-<span class="sb-title">NEXORA // ULT</span>
+<span class="sb-title">SYSTEM // CONFIG</span>
 <i class="fas fa-times" style="cursor:pointer; color:#666;" onclick="document.getElementById('sidebar').classList.remove('open')"></i>
 </div>
 
 <div class="sb-content">
 <details open>
-<summary>Global Theme</summary>
+<summary>Visual Themes</summary>
 <div class="control-group">
-<select id="presetSel" onchange="app.loadPreset(this.value)">
-<option value="custom">Custom</option>
+<span class="row">Select Preset</span>
+<select id="presetSel" onchange="app.applyTheme(this.value)">
 <option value="cyberpunk">Cyberpunk (Default)</option>
-<option value="neon">Neon Night</option>
-<option value="minimal">Minimalist</option>
-<option value="matrix">The Matrix</option>
-<option value="amoled">Deep Dark</option>
+<option value="matrix">The Matrix (Rain)</option>
+<option value="glacier">Glacier (Snow)</option>
+<option value="inferno">Inferno (Embers)</option>
+<option value="void">Void (Space)</option>
 </select>
 </div>
 </details>
 
 <details>
-<summary>Grid Management</summary>
+<summary>Widgets & HUD</summary>
 <div class="control-group">
-<div class="row">
-<span>Edit Mode (Show Delete)</span>
-<input type="checkbox" id="editModeCheck" onchange="app.toggleEditMode(this.checked)">
-</div>
-<hr style="border:0; border-top:1px solid #333; width:100%;">
-<input type="text" id="newTitle" placeholder="Title (e.g. YouTube)">
-<input type="url" id="newUrl" placeholder="URL (https://...)">
-<button class="btn btn-action" onclick="app.addLink()">ADD LINK</button>
-
-<div style="margin-top:15px;">
-<span class="row">Columns: <span id="colVal">5</span></span>
-<input type="range" min="2" max="8" value="5" oninput="app.setCSS('--grid-cols', this.value); document.getElementById('colVal').innerText=this.value; app.save('gridCols', this.value)">
-</div>
+<div class="row"><span>Clock</span> <input type="checkbox" checked onchange="app.toggleWidget('widgetClock', this.checked)"></div>
+<div class="row"><span>Date</span> <input type="checkbox" checked onchange="app.toggleWidget('widgetDate', this.checked)"></div>
+<div class="row"><span>Greeting</span> <input type="checkbox" checked onchange="app.toggleWidget('widgetGreet', this.checked)"></div>
+<div class="row"><span>System Stats (Fake)</span> <input type="checkbox" onchange="app.toggleWidget('widgetSys', this.checked)"></div>
+<div class="row"><span>24H Format</span> <input type="checkbox" id="clk24" onchange="app.save('clk24', this.checked)"></div>
 </div>
 </details>
 
 <details>
-<summary>Visuals & UI</summary>
+<summary>Link Manager</summary>
 <div class="control-group">
-<div class="row">
-<span>Accent Color</span>
-<input type="color" id="accentPick" onchange="app.setAccent(this.value)">
-</div>
-<div class="row">
-<span>Background Blur</span>
-<input type="range" min="0" max="50" oninput="app.setCSS('--glass-blur', this.value+'px'); app.save('blur', this.value)">
-</div>
-<div class="row">
-<span>Scanlines</span>
-<input type="checkbox" onchange="document.querySelector('.scanline').classList.toggle('active', this.checked); app.save('scanline', this.checked)">
-</div>
-<span style="font-size:10px; color:#888; margin-top:5px;">Wallpaper URL</span>
-<input type="text" onchange="document.body.style.backgroundImage=`url('${this.value}')`; app.save('bg', this.value)">
+<input type="text" id="newTitle" placeholder="Link Title">
+<input type="url" id="newUrl" placeholder="Link URL">
+<button class="btn" onclick="app.addLink()">Add Link</button>
+<button class="btn btn-red" onclick="if(confirm('Restore default links?')){app.resetLinks();}">Reset Defaults</button>
 </div>
 </details>
 
 <details>
-<summary>Particle System</summary>
+<summary>Stealth Mode</summary>
 <div class="control-group">
-<div class="row"><span>Count</span> <input type="number" id="pCount" value="50" style="width:50px" onchange="particles.init()"></div>
-<div class="row"><span>Speed</span> <input type="range" min="1" max="10" value="2" oninput="particles.speedMultiplier = this.value/2"></div>
-<div class="row"><span>Connect Lines</span> <input type="checkbox" id="pLine" onchange="particles.init()"></div>
-<div class="row"><span>Mouse React</span> <input type="checkbox" id="pReact" checked></div>
-<select id="pShape" onchange="particles.init()">
-<option value="circle">Circle</option>
-<option value="square">Square</option>
-<option value="triangle">Triangle</option>
-<option value="char">Matrix Text</option>
-</select>
-</div>
-</details>
-
-<details>
-<summary>Stealth & Cloak</summary>
-<div class="control-group">
-<select onchange="app.setCloak(this.value)">
-<option value="">-- Quick Cloak --</option>
+<select onchange="app.cloak(this.value)">
+<option value="">-- Disguise Tab --</option>
 <option value="google">Google Classroom</option>
 <option value="canvas">Canvas LMS</option>
 <option value="docs">Google Docs</option>
-<option value="drive">Google Drive</option>
 </select>
-<div class="row">
-<span>Panic Button (F9)</span>
-<input type="checkbox" id="panicCheck" checked onchange="app.save('panic', this.checked)">
-</div>
-<div class="row">
-<span>Panic Action</span>
-<select id="panicType" style="width:60%" onchange="app.save('panicType', this.value)">
-<option value="blank">White Screen</option>
-<option value="error">Fake BSOD</option>
-<option value="google">Redirect Google</option>
-</select>
-</div>
+<button class="btn btn-red" onclick="window.location.replace('https://google.com')">PANIC BUTTON</button>
 </div>
 </details>
 
-<details>
-<summary>System & Data</summary>
-<div class="control-group">
-<div class="row"><span>Fake Sys Stats</span> <input type="checkbox" onchange="document.getElementById('sysStat').style.display = this.checked ? 'block' : 'none'; app.save('sysStats', this.checked)"></div>
-<div class="row"><span>24h Clock</span> <input type="checkbox" id="clk24" onchange="app.save('clk24', this.checked)"></div>
-<button class="btn" onclick="app.exportSettings()">Export Config (JSON)</button>
-<button class="btn" onclick="document.getElementById('impFile').click()">Import Config</button>
-<input type="file" id="impFile" style="display:none" onchange="app.importSettings(this)">
-<button class="btn btn-danger" onclick="if(confirm('Wipe everything?')) { localStorage.clear(); location.reload(); }">FACTORY RESET</button>
-</div>
-</details>
+<div style="margin-top:20px; text-align:center; font-size:10px; color:#444;">NEXORA HUB v2.0</div>
 </div>
 </aside>
 
 <script>
-/**
-* NEXORA ULTIMATE CORE
-* Handles Settings, Grid, Stealth, and Utils
-*/
+const defaultLinks = [
+{ n: "Nexora", u: "https://mathematicss.global.ssl.fastly.net" },
+{ n: "Luminal", u: "https://sciencea.global.ssl.fastly.net" },
+{ n: "Hideout", u: "https://artsuplies.global.ssl.fastly.net" },
+{ n: "Holy Tuna", u: "https://fishingsuplies.global.ssl.fastly.net" },
+{ n: "Noah Hub", u: "https://memeresetaintgonnawork.global.ssl.fastly.net" },
+{ n: "Velara", u: "https://t2026soon.global.ssl.fastly.net" },
+{ n: "Strongdog", u: "https://spanishtranslator.global.ssl.fastly.net" },
+{ n: "Movies", u: "https://mrbeastisrich.global.ssl.fastly.net" },
+{ n: "Petezah", u: "https://AAbattery.global.ssl.fastly.net" },
+{ n: "Roblox", u: "https://our-ddddd.global.ssl.fastly.net" },
+{ n: "Froggie", u: "https://froggie.global.ssl.fastly.net" },
+{ n: "Interstellar", u: "https://interstellar.global.ssl.fastly.net" },
+{ n: "Utopia", u: "https://utopia.global.ssl.fastly.net" },
+{ n: "Shadow", u: "https://shadow.global.ssl.fastly.net" },
+{ n: "Nebula", u: "https://nebula.global.ssl.fastly.net" },
+{ n: "Zenith", u: "https://zenith.global.ssl.fastly.net" }
+];
+
 const app = {
-data: {
-links: [
-{ t: "Nexora", u: "https://mathematicss.global.ssl.fastly.net" },
-{ t: "Luminal", u: "https://sciencea.global.ssl.fastly.net" },
-{ t: "Hideout", u: "https://artsuplies.global.ssl.fastly.net" },
-{ t: "Google", u: "https://google.com" }
-],
-settings: {}
-},
+links: [],
+theme: 'cyberpunk',
 
 init: function() {
-this.loadSettings();
-this.renderGrid();
-this.startClock();
+// Load Links
+const savedLinks = localStorage.getItem('nx_links');
+this.links = savedLinks ? JSON.parse(savedLinks) : defaultLinks;
+
+// Load Settings
+const savedTheme = localStorage.getItem('nx_theme');
+if(savedTheme) { document.getElementById('presetSel').value = savedTheme; this.applyTheme(savedTheme); }
+else { this.applyTheme('cyberpunk'); }
+
+this.renderGrid(this.links);
+this.initWidgets();
 this.initCursor();
 particles.init();
+requestAnimationFrame(() => particles.loop());
+},
 
-// Keyboard Shortcuts
-document.addEventListener('keydown', (e) => {
-if (e.key === 'F9' && document.getElementById('panicCheck').checked) this.triggerPanic();
-if (e.key === 'Escape') this.clearPanic();
+renderGrid: function(list) {
+const grid = document.getElementById('grid');
+grid.innerHTML = '';
+list.forEach((l, i) => {
+const el = document.createElement('a');
+el.className = 'box'; el.href = l.u; el.target = "_blank";
+
+// Simple Icon Logic
+let ico = 'fa-globe';
+if(l.n.toLowerCase().includes('movie')) ico = 'fa-film';
+if(l.n.toLowerCase().includes('game') || l.n.toLowerCase().includes('roblox')) ico = 'fa-gamepad';
+if(l.n.toLowerCase().includes('math') || l.n.toLowerCase().includes('nex')) ico = 'fa-calculator';
+
+el.innerHTML = `<i class="fas ${ico}"></i><span>${l.n}</span>`;
+grid.appendChild(el);
 });
 },
 
-// --- GRID SYSTEM ---
-renderGrid: function() {
-const el = document.getElementById('grid');
-el.innerHTML = '';
-this.data.links.forEach((l, i) => {
-const box = document.createElement('div');
-box.className = 'box';
-// Check if URL is clicked or Delete is clicked
-box.onclick = (e) => {
-if(e.target.classList.contains('del-btn')) {
-this.deleteLink(i);
-} else {
-window.open(l.u, '_blank');
-}
-};
-
-// Icon logic (simple auto-detection)
-let icon = 'fa-globe';
-if(l.u.includes('youtube')) icon = 'fa-youtube';
-else if(l.u.includes('discord')) icon = 'fa-discord';
-else if(l.u.includes('github')) icon = 'fa-github';
-else if(l.u.includes('spotify')) icon = 'fa-spotify';
-
-box.innerHTML = `
-<div class="del-btn"><i class="fas fa-trash"></i></div>
-<i class="fab ${icon} fas"></i>
-<span>${l.t}</span>
-`;
-el.appendChild(box);
-});
+filterGrid: function(query) {
+const filtered = this.links.filter(l => l.n.toLowerCase().includes(query.toLowerCase()));
+this.renderGrid(filtered);
 },
 
 addLink: function() {
-const t = document.getElementById('newTitle').value;
+const n = document.getElementById('newTitle').value;
 const u = document.getElementById('newUrl').value;
-if(t && u) {
-this.data.links.push({t, u});
-this.saveLinks();
-this.renderGrid();
-document.getElementById('newTitle').value = '';
-document.getElementById('newUrl').value = '';
+if(n && u) {
+this.links.push({n, u});
+localStorage.setItem('nx_links', JSON.stringify(this.links));
+this.renderGrid(this.links);
 }
 },
 
-deleteLink: function(index) {
-if(confirm('Delete this link?')) {
-this.data.links.splice(index, 1);
-this.saveLinks();
-this.renderGrid();
+resetLinks: function() {
+this.links = defaultLinks;
+localStorage.setItem('nx_links', JSON.stringify(this.links));
+this.renderGrid(this.links);
+},
+
+// THEME ENGINE
+applyTheme: function(name) {
+this.theme = name;
+localStorage.setItem('nx_theme', name);
+const r = document.documentElement;
+
+if(name === 'cyberpunk') {
+r.style.setProperty('--bg', '#030303');
+r.style.setProperty('--accent', '#00f2ff');
+r.style.setProperty('--sec-accent', '#ff0055');
+r.style.setProperty('--font-tech', 'Orbitron');
+document.querySelector('.scanline').classList.add('active');
 }
+else if(name === 'matrix') {
+r.style.setProperty('--bg', '#000000');
+r.style.setProperty('--accent', '#00ff41');
+r.style.setProperty('--sec-accent', '#008F11');
+r.style.setProperty('--font-tech', 'JetBrains Mono');
+document.querySelector('.scanline').classList.add('active');
+}
+else if(name === 'glacier') {
+r.style.setProperty('--bg', '#050a14');
+r.style.setProperty('--accent', '#a6f0ff');
+r.style.setProperty('--sec-accent', '#ffffff');
+document.querySelector('.scanline').classList.remove('active');
+}
+else if(name === 'inferno') {
+r.style.setProperty('--bg', '#110500');
+r.style.setProperty('--accent', '#ff4d00');
+r.style.setProperty('--sec-accent', '#ffaa00');
+document.querySelector('.scanline').classList.remove('active');
+}
+else if(name === 'void') {
+r.style.setProperty('--bg', '#080808');
+r.style.setProperty('--accent', '#ffffff');
+r.style.setProperty('--sec-accent', '#444');
+document.querySelector('.scanline').classList.remove('active');
+}
+
+particles.init(); // Reset particles for new theme
 },
 
-toggleEditMode: function(active) {
-const btns = document.querySelectorAll('.del-btn');
-btns.forEach(b => b.style.display = active ? 'block' : 'none'); // Simple CSS toggle could work too
-// Actually relying on CSS hover opacity, but let's make it permanent if checked
-const style = document.getElementById('editStyle') || document.createElement('style');
-style.id = 'editStyle';
-style.innerHTML = active ? '.del-btn { opacity: 1 !important; }' : '';
-document.head.appendChild(style);
-},
-
-// --- SETTINGS & STATE ---
-saveLinks: function() { localStorage.setItem('nx_links', JSON.stringify(this.data.links)); },
-
-save: function(key, val) {
-this.data.settings[key] = val;
-localStorage.setItem('nx_settings', JSON.stringify(this.data.settings));
-},
-
-loadSettings: function() {
-// Load Links
-const l = localStorage.getItem('nx_links');
-if(l) this.data.links = JSON.parse(l);
-
-// Load Settings
-const s = localStorage.getItem('nx_settings');
-if(s) this.data.settings = JSON.parse(s);
-
-// Apply Settings
-const set = this.data.settings;
-if(set.bg) document.body.style.backgroundImage = `url('${set.bg}')`;
-if(set.accent) this.setAccent(set.accent);
-if(set.blur) this.setCSS('--glass-blur', set.blur+'px');
-if(set.gridCols) this.setCSS('--grid-cols', set.gridCols);
-if(set.scanline) document.querySelector('.scanline').classList.add('active');
-if(set.sysStats) document.getElementById('sysStat').style.display = 'block';
-},
-
-exportSettings: function() {
-const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.data));
-const a = document.createElement('a');
-a.href = data; a.download = 'nexora_config.json'; a.click();
-},
-
-importSettings: function(input) {
-const reader = new FileReader();
-reader.onload = (e) => {
-const d = JSON.parse(e.target.result);
-localStorage.setItem('nx_links', JSON.stringify(d.links));
-localStorage.setItem('nx_settings', JSON.stringify(d.settings));
-location.reload();
-};
-reader.readAsText(input.files[0]);
-},
-
-// --- UI HELPERS ---
+// UTILS
 switchTab: function(id, btn) {
 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -443,192 +355,145 @@ document.getElementById(id).classList.add('active');
 btn.classList.add('active');
 },
 
-setCSS: function(k, v) { document.documentElement.style.setProperty(k, v); },
-
-setAccent: function(c) {
-this.setCSS('--accent', c);
-this.setCSS('--glow', `0 0 20px ${c}44`);
-this.save('accent', c);
-},
-
-loadPreset: function(type) {
-if(type === 'cyberpunk') {
-this.setAccent('#00f2ff'); this.setCSS('--bg', '#030303');
-document.getElementById('pShape').value = 'circle';
-} else if (type === 'neon') {
-this.setAccent('#ff00ff'); this.setCSS('--bg', '#0a000a');
-this.setCSS('--glass-blur', '20px');
-} else if (type === 'minimal') {
-this.setAccent('#ffffff'); this.setCSS('--bg', '#111');
-this.setCSS('--glass-blur', '0px');
-document.getElementById('pCount').value = 0;
-} else if (type === 'matrix') {
-this.setAccent('#00ff00'); this.setCSS('--bg', '#000');
-document.getElementById('pShape').value = 'char';
-}
-particles.init();
-},
-
-// --- STEALTH ---
-setCloak: function(type) {
-const icons = {
-google: "https://ssl.gstatic.com/classroom/favicon.png",
-canvas: "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico",
-docs: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico",
-drive: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png"
-};
-const titles = { google: "Classes", canvas: "Dashboard", docs: "My Essay", drive: "My Drive" };
-
-if(titles[type]) {
-document.title = titles[type];
-document.getElementById('siteIcon').href = icons[type];
-}
-},
-
-triggerPanic: function() {
-const type = document.getElementById('panicType').value;
-if(type === 'blank') document.getElementById('panicOverlay').style.display = 'flex';
-else if(type === 'error') document.getElementById('fakeError').style.display = 'block';
-else if(type === 'google') window.location.href = "https://google.com";
-},
-
-clearPanic: function() {
-document.getElementById('panicOverlay').style.display = 'none';
-document.getElementById('fakeError').style.display = 'none';
-},
-
-// --- MEDIA ---
 loadMedia: function() {
-let url = document.getElementById('mediaInput').value;
-if(url.includes('spotify.com') && !url.includes('/embed')) {
-url = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
-} else if (url.includes('youtube.com/watch')) {
-const vid = url.split('v=')[1];
-url = `https://www.youtube.com/embed/${vid}`;
-}
-document.getElementById('spotifyFrame').src = url;
+document.getElementById('mediaFrame').src = document.getElementById('mediaInput').value;
 },
 
-// --- WIDGETS ---
-startClock: function() {
-const update = () => {
-const now = new Date();
-const is24 = document.getElementById('clk24').checked;
-document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: !is24});
-document.getElementById('date').innerText = now.toLocaleDateString([], {weekday: 'short', month: 'short', day: 'numeric'});
-
-// Fake Sys Stats Randomizer
-if(Math.random() > 0.5) {
-const cpu = Math.floor(Math.random() * 30) + 5;
-const ram = (Math.random() * 2 + 3).toFixed(1);
-document.getElementById('sysStat').innerText = `CPU: ${cpu}% | RAM: ${ram}GB`;
-}
+cloak: function(type) {
+const maps = {
+google: { t: "Classes", i: "https://ssl.gstatic.com/classroom/favicon.png" },
+canvas: { t: "Dashboard", i: "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico" },
+docs: { t: "My Essay", i: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" }
 };
-setInterval(update, 1000);
-update();
+if(maps[type]) {
+document.title = maps[type].t;
+document.getElementById('siteIcon').href = maps[type].i;
+}
 },
+
+// WIDGETS
+initWidgets: function() {
+setInterval(() => {
+const d = new Date();
+const is24 = document.getElementById('clk24').checked;
+document.getElementById('widgetClock').innerText = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12: !is24});
+document.getElementById('widgetDate').innerText = d.toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'});
+
+const hr = d.getHours();
+let greet = "Welcome";
+if(hr < 12) greet = "Good Morning";
+else if(hr < 18) greet = "Good Afternoon";
+else greet = "Good Evening";
+document.getElementById('widgetGreet').innerText = greet;
+
+// Fake Stats Randomizer
+if(Math.random() > 0.8) {
+document.getElementById('widgetSys').innerText = `CPU: ${Math.floor(Math.random()*20)}% RAM: ${(Math.random()*2+2).toFixed(1)}GB`;
+}
+}, 1000);
+},
+
+toggleWidget: function(id, on) { document.getElementById(id).style.display = on ? 'block' : 'none'; },
 
 initCursor: function() {
 const c = document.getElementById('cursor');
-window.onmousemove = e => {
-if(document.body.classList.contains('custom-cursor')) {
-c.style.left = e.clientX + 'px';
-c.style.top = e.clientY + 'px';
-c.classList.add('active');
-}
-};
-}
+window.onmousemove = e => { c.style.left = e.clientX+'px'; c.style.top = e.clientY+'px'; }
+},
+
+save: function(k, v) { localStorage.setItem('nx_'+k, v); }
 };
 
-/**
-* ADVANCED PARTICLE ENGINE
-* Supports shapes, connections, mouse interaction
-*/
+// PARTICLE ENGINE v2
 const particles = {
-ctx: null, cvs: null, array: [], speedMultiplier: 1,
+cvs: null, ctx: null, items: [],
 init: function() {
 this.cvs = document.getElementById('particleCanvas');
 this.ctx = this.cvs.getContext('2d');
-this.cvs.width = window.innerWidth;
-this.cvs.height = window.innerHeight;
-
-const count = document.getElementById('pCount').value;
-const shape = document.getElementById('pShape').value;
-this.array = [];
-
-for(let i=0; i<count; i++) {
-this.array.push({
+this.resize();
+this.create();
+},
+resize: function() { this.cvs.width = window.innerWidth; this.cvs.height = window.innerHeight; },
+create: function() {
+this.items = [];
+const cnt = app.theme === 'matrix' ? 80 : 60;
+for(let i=0; i<cnt; i++) {
+this.items.push({
 x: Math.random() * this.cvs.width,
 y: Math.random() * this.cvs.height,
-vx: (Math.random() - 0.5) * 2,
-vy: (Math.random() - 0.5) * 2,
-size: Math.random() * 3 + 1,
-shape: shape,
-char: String.fromCharCode(0x30A0 + Math.random() * 96) // Matrix Katakana
+s: Math.random() * 2 + 1, // Speed
+sz: Math.random() * 20 + 10, // Size
+char: String.fromCharCode(0x30A0 + Math.random()*96),
+o: Math.random() // Opacity
 });
 }
 },
-
-draw: function() {
-const ctx = this.ctx;
-ctx.clearRect(0, 0, this.cvs.width, this.cvs.height);
+loop: function() {
+this.ctx.clearRect(0,0,this.cvs.width, this.cvs.height);
+const t = app.theme;
 const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-const connect = document.getElementById('pLine').checked;
-const react = document.getElementById('pReact').checked;
+this.ctx.fillStyle = accent;
 
-ctx.fillStyle = accent;
-ctx.strokeStyle = accent;
+this.items.forEach(p => {
+// PHYSICS & DRAWING
+if(t === 'cyberpunk' || t === 'void') {
+// Nodes / Stars
+p.y -= p.s * 0.2;
+if(p.y < 0) p.y = this.cvs.height;
+this.ctx.beginPath();
+this.ctx.globalAlpha = p.o * 0.5;
+this.ctx.arc(p.x, p.y, t==='void'?Math.random()*2:2, 0, Math.PI*2);
+this.ctx.fill();
 
-this.array.forEach((p, i) => {
-// Move
-p.x += p.vx * this.speedMultiplier;
-p.y += p.vy * this.speedMultiplier;
-
-// Matrix rain effect override
-if(p.shape === 'char') {
-p.vx = 0; p.vy = Math.random() * 5 + 2;
-}
-
-// Wrap
-if(p.x < 0) p.x = this.cvs.width; if(p.x > this.cvs.width) p.x = 0;
-if(p.y < 0) p.y = this.cvs.height; if(p.y > this.cvs.height) p.y = 0;
-
-// Draw Shape
-ctx.beginPath();
-if(p.shape === 'circle') ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-else if (p.shape === 'square') ctx.rect(p.x, p.y, p.size*2, p.size*2);
-else if (p.shape === 'triangle') {
-ctx.moveTo(p.x, p.y); ctx.lineTo(p.x+5, p.y+10); ctx.lineTo(p.x-5, p.y+10);
-}
-else if (p.shape === 'char') {
-ctx.font = '14px monospace'; ctx.fillText(p.char, p.x, p.y);
-if(Math.random() > 0.95) p.char = String.fromCharCode(0x30A0 + Math.random() * 96);
-}
-
-if(p.shape !== 'char') ctx.fill();
-
-// Connections
-if(connect) {
-this.array.forEach((p2, j) => {
-if(i === j) return;
-const dx = p.x - p2.x, dy = p.y - p2.y;
-const dist = Math.sqrt(dx*dx + dy*dy);
-if(dist < 100) {
-ctx.globalAlpha = 1 - (dist/100);
-ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-ctx.globalAlpha = 1;
+// Connections (Cyberpunk only)
+if(t === 'cyberpunk') {
+this.items.forEach(p2 => {
+const d = Math.hypot(p.x-p2.x, p.y-p2.y);
+if(d < 100) {
+this.ctx.strokeStyle = accent;
+this.ctx.lineWidth = 0.5;
+this.ctx.beginPath(); this.ctx.moveTo(p.x, p.y); this.ctx.lineTo(p2.x, p2.y); this.ctx.stroke();
 }
 });
 }
+}
+else if(t === 'matrix') {
+// Rain
+p.y += p.s * 4;
+if(p.y > this.cvs.height) p.y = -20;
+this.ctx.font = '14px monospace';
+this.ctx.globalAlpha = 0.8;
+this.ctx.fillText(p.char, p.x, p.y);
+if(Math.random() > 0.95) p.char = String.fromCharCode(0x30A0 + Math.random()*96);
+}
+else if(t === 'glacier') {
+// Snow
+p.y += p.s;
+p.x += Math.sin(p.y * 0.01) * 0.5; // Sway
+if(p.y > this.cvs.height) p.y = -10;
+this.ctx.beginPath();
+this.ctx.globalAlpha = 0.6;
+this.ctx.arc(p.x, p.y, p.s, 0, Math.PI*2);
+this.ctx.fill();
+}
+else if(t === 'inferno') {
+// Embers
+p.y -= p.s;
+p.x += (Math.random()-0.5);
+p.o -= 0.01;
+if(p.y < 0 || p.o <= 0) { p.y = this.cvs.height; p.o = 1; }
+this.ctx.beginPath();
+this.ctx.globalAlpha = p.o;
+this.ctx.rect(p.x, p.y, p.s, p.s);
+this.ctx.fill();
+}
 });
-requestAnimationFrame(this.draw.bind(this));
+
+requestAnimationFrame(() => this.loop());
 }
 };
 
-// Initialize
-window.onload = () => { app.init(); particles.draw(); };
-window.onresize = () => particles.init();
-
+window.onload = app.init.bind(app);
+window.onresize = particles.resize.bind(particles);
 </script>
 </body>
 </html>
