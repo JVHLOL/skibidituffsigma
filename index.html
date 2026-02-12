@@ -15,16 +15,18 @@
 :root {
     --bg: #030303;
     --accent: #00f2ff;
+    --sec-accent: #ff0055;
     --text: #ffffff;
     --panel-bg: rgba(5,5,5,0.92);
     --glow: 0 0 20px rgba(0, 242, 255, 0.3);
     --box-size: 130px;
     --grid-gap: 20px;
-    --glass-blur: 12px;
+    --glass-blur: 15px;
     --grid-cols: 5;
     --radius: 16px;
     --font-main: 'Plus Jakarta Sans', sans-serif;
     --font-tech: 'Orbitron', monospace;
+    --font-mono: 'JetBrains Mono', monospace;
 }
 
 /* Core Setup */
@@ -36,19 +38,20 @@ body {
     transition: background 0.5s, color 0.5s;
 }
 
-/* Cursor Customization */
+/* Custom Cursor */
 body.custom-cursor * { cursor: none !important; }
 #cursor { position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); display: none; }
 #cursor.active { display: block; }
 #cursor .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: var(--glow); }
+#cursor .ring { position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); width: 35px; height: 35px; border: 1px solid var(--accent); border-radius: 50%; opacity: 0.4; transition: 0.15s cubic-bezier(0.2, 0.8, 0.2, 1); }
+body:active #cursor .ring { width: 20px; height: 20px; background: var(--accent); opacity: 0.2; }
 
-/* Grid Floating Animation */
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-8px); }
-}
+/* Visual Overlays */
+.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(circle, transparent 40%, black 150%); }
+.scanline { position: fixed; inset: 0; z-index: 9000; pointer-events: none; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1)); background-size: 100% 4px; display: none; }
+.scanline.active { display: block; }
 
-/* Overlays */
+/* Math Helper Overlay */
 #mathHelper {
     position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
     z-index: 10000; display: none; align-items: center; justify-content: center;
@@ -57,18 +60,28 @@ body.custom-cursor * { cursor: none !important; }
     background: var(--panel-bg); width: 450px; padding: 30px; border-radius: 20px;
     border: 1px solid var(--accent); box-shadow: var(--glow); text-align: center;
 }
-#mathInput { width: 100%; background: #111; border: 1px solid #333; color: var(--accent); padding: 15px; border-radius: 10px; font-family: 'JetBrains Mono'; font-size: 18px; margin-top: 15px; }
-#mathResult { margin-top: 20px; font-size: 24px; font-weight: bold; color: #fff; min-height: 30px; }
 
-/* Tabs & Navigation */
-.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; padding: 10px; z-index: 100; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 0 0 20px 20px; }
+/* Widgets Area */
+.widget-area { position: fixed; top: 25px; right: 30px; text-align: right; z-index: 50; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
+.clock { font-family: var(--font-tech); font-size: 32px; color: var(--text); text-shadow: var(--glow); font-weight: 700; }
+.date { font-size: 11px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
+.sys-stat { font-family: var(--font-mono); font-size: 10px; color: var(--sec-accent); margin-top: 5px; opacity: 0.8; }
+
+/* Navigation */
+.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; padding: 10px; z-index: 100; background: rgba(0,0,0,0.4); backdrop-filter: blur(15px); border-radius: 0 0 20px 20px; border: 1px solid rgba(255,255,255,0.05); }
 .tab { padding: 8px 20px; border-radius: 15px; font-family: var(--font-tech); font-size: 10px; color: #666; cursor: pointer; border: none; background: transparent; transition: 0.3s; }
-.tab.active { color: var(--accent); text-shadow: var(--glow); background: rgba(255,255,255,0.05); }
+.tab.active { color: var(--accent); background: rgba(255,255,255,0.05); box-shadow: var(--glow); }
 
 /* Views */
 .view { position: absolute; inset: 0; display: none; padding-top: 100px; z-index: 10; flex-direction: column; align-items: center; }
 .view.active { display: flex; animation: fadeUp 0.4s ease-out; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Main Search */
+.search-container { position: relative; margin-bottom: 30px; width: 420px; z-index: 20; }
+.search-bar { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px 45px; border-radius: 30px; color: white; font-family: var(--font-mono); backdrop-filter: blur(10px); transition: 0.3s; }
+.search-bar:focus { border-color: var(--accent); box-shadow: var(--glow); }
+.search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 14px; opacity: 0.6; }
 
 /* Grid */
 .grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: var(--grid-gap); padding: 20px; }
@@ -80,37 +93,48 @@ body.custom-cursor * { cursor: none !important; }
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     animation: float 4s ease-in-out infinite;
 }
-.box:hover { border-color: var(--accent); transform: scale(1.1) rotate(2deg); box-shadow: var(--glow); background: rgba(255,255,255,0.1); animation-play-state: paused; }
-.box i { font-size: 28px; margin-bottom: 12px; transition: 0.3s; }
-.box:hover i { color: var(--accent); text-shadow: var(--glow); }
+.box:hover { border-color: var(--accent); transform: scale(1.1) translateY(-5px); box-shadow: var(--glow); background: rgba(255,255,255,0.1); }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.del-btn { position: absolute; top: 8px; right: 8px; color: #ff4444; font-size: 10px; cursor: pointer; opacity: 0; transition: 0.2s; }
+.box:hover .del-btn { opacity: 1; }
 
 /* Media Theater */
-.media-container { width: 90%; max-width: 1000px; height: 60vh; border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; display:flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-.media-container.cinema { position: fixed; inset: 20px; width: auto; height: auto; z-index: 1000; }
-.media-lib { width: 90%; max-width: 1000px; margin-top: 20px; display: flex; gap: 10px; overflow-x: auto; padding: 10px; }
-.lib-item { padding: 8px 15px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 11px; cursor: pointer; white-space: nowrap; border: 1px solid transparent; transition: 0.2s; }
-.lib-item:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,255,255,0.1); }
+.media-container { width: 90%; max-width: 1000px; height: 65vh; border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; display:flex; flex-direction: column; box-shadow: 0 30px 60px rgba(0,0,0,0.8); position: relative; }
+.media-container.cinema { position: fixed; inset: 20px; width: auto; height: auto; z-index: 1000; max-width: none; }
+.media-bar { padding: 15px; background: #080808; display: flex; gap: 10px; align-items: center; border-top: 1px solid #222; }
 
 /* Sidebar */
-.sidebar { position: fixed; top: 0; right: -400px; width: 350px; height: 100%; background: var(--panel-bg); backdrop-filter: blur(30px); z-index: 5000; transition: 0.4s; border-left: 1px solid rgba(255,255,255,0.1); padding: 25px; overflow-y: auto; }
-.sidebar.open { right: 0; }
+.sidebar { position: fixed; top: 0; right: -420px; width: 380px; height: 100%; background: var(--panel-bg); backdrop-filter: blur(40px); z-index: 5000; transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); border-left: 1px solid rgba(255,255,255,0.1); padding: 30px; overflow-y: auto; }
+.sidebar.open { right: 0; box-shadow: -50px 0 100px rgba(0,0,0,0.5); }
 .sb-section { margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+details summary { cursor: pointer; font-family: var(--font-tech); font-size: 11px; color: var(--accent); margin-bottom: 10px; list-style: none; }
 
-input, select, .btn { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; font-size: 11px; width: 100%; margin-top: 8px; cursor: pointer; }
-.btn-accent { background: var(--accent); color: #000; font-weight: bold; border: none; }
-.btn-red { border-color: #552222; color: #ff5555; }
+/* Inputs */
+input, select, .btn { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; font-size: 11px; width: 100%; margin-top: 8px; }
+.btn-accent { background: var(--accent); color: #000; font-weight: bold; border: none; cursor: pointer; }
+.btn-red { border-color: #552222; color: #ff5555; cursor: pointer; }
+
+/* Panic */
+#fakeError { position: fixed; inset: 0; background: #0000aa; color: #fff; font-family: monospace; z-index: 99999; display: none; padding: 50px; font-size: 18px; }
 </style>
 </head>
 <body class="custom-cursor">
 
-<div id="cursor"><div class="dot"></div></div>
+<div id="cursor"><div class="dot"></div><div class="ring"></div></div>
+<div class="vignette"></div>
+<div class="scanline"></div>
 <canvas id="particleCanvas" style="position:fixed; inset:0; pointer-events:none; z-index:1;"></canvas>
+
+<div id="fakeError">
+    <p>*** FATAL EXCEPTION 0E HAS OCCURRED AT 0028:C0011E36 IN VXD VMM(01) + 00010E36. THE CURRENT APPLICATION WILL BE TERMINATED.</p>
+    <p>* PRESS ANY KEY TO TERMINATE THE APPLICATION.</p>
+</div>
 
 <div id="mathHelper">
     <div class="math-card">
-        <h2 style="font-family: var(--font-tech); color: var(--accent); margin:0;">NEURAL_SOLVER_V1</h2>
-        <p style="font-size: 10px; opacity: 0.6;">TYPE & PRESS ENTER (ESC TO CLOSE)</p>
-        <input type="text" id="mathInput" placeholder="e.g. 50 * sin(45 deg) + sqrt(144)">
+        <h2 style="font-family: var(--font-tech); color: var(--accent); margin:0;">NEURAL_SOLVER_V2</h2>
+        <p style="font-size: 10px; opacity: 0.6;">TYPE & ENTER (ESC TO CLOSE)</p>
+        <input type="text" id="mathInput" placeholder="e.g. 15 * sin(45 deg)">
         <div id="mathResult">Ready...</div>
     </div>
 </div>
@@ -120,9 +144,16 @@ input, select, .btn { background: #111; border: 1px solid #333; color: white; pa
     <button class="tab" onclick="app.switchTab('media', this)">THEATER</button>
 </div>
 
+<div class="widget-area">
+    <div id="widgetClock" class="clock">00:00</div>
+    <div id="widgetDate" class="date">LOADING...</div>
+    <div id="widgetSys" class="sys-stat">CPU: 0% RAM: 0GB</div>
+</div>
+
 <div id="home" class="view active">
-    <div style="margin-bottom: 30px; width: 400px;">
-        <input type="text" id="mainSearch" placeholder="Terminal Search..." style="border-radius: 30px; padding: 12px 25px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+    <div class="search-container">
+        <i class="fas fa-terminal search-icon"></i>
+        <input type="text" id="mainSearch" class="search-bar" placeholder="Terminal Search...">
     </div>
     <div class="grid" id="grid"></div>
 </div>
@@ -130,64 +161,84 @@ input, select, .btn { background: #111; border: 1px solid #333; color: white; pa
 <div id="media" class="view">
     <div class="media-container" id="mediaBox">
         <iframe id="mediaFrame" src="" allow="autoplay; encrypted-media; fullscreen"></iframe>
-        <div style="padding: 10px; background: #0a0a0a; display: flex; gap: 10px;">
-            <input type="text" id="mediaInput" placeholder="Paste URL here..." style="margin:0;">
+        <div class="media-bar">
+            <input type="text" id="mediaInput" placeholder="Paste YouTube/Spotify URL..." style="margin:0; flex-grow:1;">
             <button class="btn-accent" style="width: 80px; margin:0;" onclick="app.loadMedia()">LOAD</button>
             <button class="btn" style="width: 80px; margin:0; background:#222;" onclick="app.saveMedia()">SAVE</button>
             <button class="btn" style="width: 40px; margin:0;" onclick="app.toggleCinema()"><i class="fas fa-expand"></i></button>
         </div>
+        <div class="media-bar" style="border-top:none; padding-top:0; gap:5px;">
+             <span style="font-size:10px; color:#666;">QUICK:</span>
+             <button class="btn" style="width:auto; padding:5px 10px; font-size:9px;" onclick="app.quickPlay('lofi')">LOFI</button>
+             <button class="btn" style="width:auto; padding:5px 10px; font-size:9px;" onclick="app.quickPlay('rain')">RAIN</button>
+        </div>
     </div>
-    <div class="media-lib" id="mediaLib"></div>
+    <div id="mediaLib" style="width:90%; max-width:1000px; display:flex; gap:10px; margin-top:15px; overflow-x:auto; padding-bottom:10px;"></div>
 </div>
 
-<i class="fas fa-cog" style="position:fixed; bottom:25px; right:25px; z-index:200; cursor:pointer; opacity:0.5;" onclick="document.getElementById('sidebar').classList.toggle('open')"></i>
+<i class="fas fa-sliders-h" style="position:fixed; bottom:25px; right:25px; z-index:200; cursor:pointer;" onclick="document.getElementById('sidebar').classList.toggle('open')"></i>
 
 <aside class="sidebar" id="sidebar">
     <div class="sb-section">
         <h3 style="font-family: var(--font-tech); font-size: 11px; color: var(--accent);">WALLPAPER</h3>
         <input type="file" accept="image/*" onchange="app.handleBg(this)">
-        <button class="btn" style="margin-top:10px;" onclick="app.clearBg()">Remove Background</button>
+        <button class="btn" onclick="app.clearBg()">Remove Background</button>
     </div>
 
     <div class="sb-section">
-        <h3 style="font-family: var(--font-tech); font-size: 11px; color: var(--accent);">STYLING</h3>
-        <select onchange="app.applyTheme(this.value)">
-            <option value="cyberpunk">Cyberpunk</option>
-            <option value="matrix">Matrix</option>
-            <option value="retrowave">Retrowave</option>
-            <option value="deepsea">Deep Sea</option>
-            <option value="aura">Aura</option>
-            <option value="void">Void</option>
-        </select>
-        <select onchange="app.setFont(this.value)" style="margin-top:10px;">
-            <option value="'Plus Jakarta Sans'">Jakarta</option>
-            <option value="'Orbitron'">Orbitron</option>
-            <option value="'Press Start 2P'">Pixel</option>
-            <option value="'Bangers'">Comic</option>
-            <option value="'Creepster'">Horror</option>
-            <option value="'Dancing Script'">Elegant</option>
-        </select>
+        <details open>
+            <summary>VISUALS & THEMES</summary>
+            <select onchange="app.applyTheme(this.value)">
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="matrix">The Matrix</option>
+                <option value="retrowave">Retrowave</option>
+                <option value="deepsea">Deep Sea</option>
+                <option value="aura">Aura</option>
+            </select>
+            <select onchange="app.setFont(this.value)" style="margin-top:10px;">
+                <option value="'Plus Jakarta Sans'">Jakarta</option>
+                <option value="'Orbitron'">Orbitron</option>
+                <option value="'Press Start 2P'">Pixel</option>
+                <option value="'Creepster'">Horror</option>
+            </select>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:10px; font-size:11px;">
+                <span>Scanlines</span>
+                <input type="checkbox" onchange="document.querySelector('.scanline').classList.toggle('active', this.checked)" style="width:auto;">
+            </div>
+        </details>
     </div>
 
     <div class="sb-section">
-        <h3 style="font-family: var(--font-tech); font-size: 11px; color: var(--accent);">PARTICLES</h3>
-        <input type="text" id="partChars" placeholder="Multiple chars (e.g. 🔥❄️01)" oninput="particles.setChars(this.value)">
+        <details>
+            <summary>PARTICLE LAB</summary>
+            <input type="text" placeholder="Chars (e.g. 👾🔥01)" oninput="particles.setChars(this.value)">
+            <p style="font-size:9px; color:#666; margin: 10px 0 5px 0;">OR UPLOAD IMAGE PARTICLE</p>
+            <input type="file" accept="image/*" onchange="particles.handleUpload(this)">
+            <button class="btn" onclick="particles.resetMode()">Reset Particles</button>
+        </details>
+    </div>
+
+    <div class="sb-section">
+        <details>
+            <summary>GRID MANAGEMENT</summary>
+            <input type="text" id="newLinkName" placeholder="Site Name">
+            <input type="text" id="newLinkUrl" placeholder="https://...">
+            <button class="btn-accent" onclick="app.addLink()">Add Link</button>
+        </details>
     </div>
 
     <div class="sb-section">
         <h3 style="font-family: var(--font-tech); font-size: 11px; color: var(--accent);">STEALTH</h3>
         <input type="text" id="panicUrl" placeholder="Panic Redirect (F9)">
         <select onchange="app.cloak(this.value)" style="margin-top:10px;">
-            <option value="">Cloak Tab As...</option>
+            <option value="">Cloak Tab...</option>
             <option value="google">Google</option>
             <option value="docs">Google Docs</option>
             <option value="canvas">Canvas</option>
         </select>
     </div>
 
-    <div class="sb-section">
-        <button class="btn btn-red" onclick="app.softReset()">RESET SETTINGS</button>
-    </div>
+    <button class="btn btn-red" onclick="app.softReset()">FACTORY RESET</button>
 </aside>
 
 <script>
@@ -202,35 +253,28 @@ const app = {
     init: function() {
         this.renderGrid();
         this.renderMediaLib();
+        this.startWidgets();
         this.applyTheme(localStorage.getItem('nx_theme') || 'cyberpunk');
        
         const bg = localStorage.getItem('nx_custom_bg');
         if(bg) document.body.style.backgroundImage = `url(${bg})`;
 
         particles.init();
-       
-        // Listeners
+
         window.addEventListener('keydown', (e) => {
-            // Panic Button
-            if(e.key === 'F9') {
-                window.location.href = document.getElementById('panicUrl').value || 'https://google.com';
-            }
-            // Math Helper Toggle
+            if(e.key === 'F9') window.location.href = document.getElementById('panicUrl').value || 'https://google.com';
             if(e.key.toLowerCase() === 's' && document.activeElement.tagName !== 'INPUT') {
                 document.getElementById('mathHelper').style.display = 'flex';
                 document.getElementById('mathInput').focus();
             }
-            // Global Esc
             if(e.key === 'Escape') {
                 document.getElementById('mathHelper').style.display = 'none';
+                document.getElementById('fakeError').style.display = 'none';
                 document.getElementById('sidebar').classList.remove('open');
             }
         });
 
-        document.getElementById('mathInput').addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') this.solveMath();
-        });
-
+        document.getElementById('mathInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') this.solveMath(); });
         document.getElementById('mainSearch').addEventListener('keypress', (e) => {
             if(e.key === 'Enter') window.open('https://google.com/search?q=' + e.target.value);
         });
@@ -246,72 +290,65 @@ const app = {
     renderGrid: function() {
         const g = document.getElementById('grid');
         g.innerHTML = '';
-        this.links.forEach(l => {
+        this.links.forEach((l, idx) => {
             const b = document.createElement('div');
             b.className = 'box';
-            b.innerHTML = `<i class="fas fa-link"></i><span>${l.n}</span>`;
+            b.innerHTML = `<i class="del-btn fas fa-times" onclick="app.deleteLink(${idx}); event.stopPropagation();"></i><i class="fas fa-bolt"></i><span>${l.n}</span>`;
             b.onclick = () => window.open(l.u, '_blank');
             g.appendChild(b);
         });
     },
 
-    switchTab: function(id, btn) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
-    },
-
-    applyTheme: function(t) {
-        localStorage.setItem('nx_theme', t);
-        let ac = '#00f2ff', bg = '#030303';
-        if(t === 'matrix') ac = '#00ff41';
-        if(t === 'retrowave') ac = '#ff00d4';
-        if(t === 'deepsea') { ac = '#00d4ff'; bg = '#000814'; }
-        if(t === 'aura') { ac = '#ffcc00'; bg = '#1a0033'; }
-        if(t === 'void') ac = '#ffffff';
-
-        document.documentElement.style.setProperty('--accent', ac);
-        if(!localStorage.getItem('nx_custom_bg')) document.documentElement.style.setProperty('--bg', bg);
-        document.documentElement.style.setProperty('--glow', `0 0 20px ${ac}66`);
-    },
-
-    handleBg: function(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = e.target.result;
-                document.body.style.backgroundImage = `url(${data})`;
-                localStorage.setItem('nx_custom_bg', data);
-            };
-            reader.readAsDataURL(input.files[0]);
+    addLink: function() {
+        const n = document.getElementById('newLinkName').value;
+        const u = document.getElementById('newLinkUrl').value;
+        if(n && u) {
+            this.links.push({n, u});
+            localStorage.setItem('nx_links', JSON.stringify(this.links));
+            this.renderGrid();
         }
     },
 
-    clearBg: function() {
-        localStorage.removeItem('nx_custom_bg');
-        document.body.style.backgroundImage = 'none';
-        this.applyTheme(localStorage.getItem('nx_theme') || 'cyberpunk');
+    deleteLink: function(idx) {
+        this.links.splice(idx, 1);
+        localStorage.setItem('nx_links', JSON.stringify(this.links));
+        this.renderGrid();
+    },
+
+    startWidgets: function() {
+        const up = () => {
+            const d = new Date();
+            document.getElementById('widgetClock').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('widgetDate').innerText = d.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
+            if(Math.random() > 0.8) {
+                document.getElementById('widgetSys').innerText = `CPU: ${Math.floor(Math.random()*20+5)}% RAM: ${(Math.random()*2+2).toFixed(1)}GB`;
+            }
+        };
+        setInterval(up, 1000); up();
     },
 
     solveMath: function() {
-        const input = document.getElementById('mathInput').value;
-        const resDiv = document.getElementById('mathResult');
         try {
-            const result = math.evaluate(input);
-            resDiv.innerText = "= " + result;
-            resDiv.style.color = "var(--accent)";
-        } catch (e) {
-            resDiv.innerText = "Error in Expression";
-            resDiv.style.color = "#ff4444";
-        }
+            const res = math.evaluate(document.getElementById('mathInput').value);
+            document.getElementById('mathResult').innerText = "= " + res;
+        } catch { document.getElementById('mathResult').innerText = "Error"; }
+    },
+
+    loadMedia: function() {
+        let val = document.getElementById('mediaInput').value;
+        if(val.includes('watch?v=')) val = val.replace('watch?v=', 'embed/');
+        document.getElementById('mediaFrame').src = val;
+    },
+
+    quickPlay: function(t) {
+        const u = { lofi: "https://www.youtube.com/embed/jfKfPfyJRdk", rain: "https://www.youtube.com/embed/mPZkdNFkNps" };
+        document.getElementById('mediaFrame').src = u[t];
     },
 
     saveMedia: function() {
         const url = document.getElementById('mediaInput').value;
-        if(!url) return;
-        const name = prompt("Save as?");
-        if(name) {
+        const name = prompt("Name this media:");
+        if(name && url) {
             this.savedMedia.push({n: name, u: url});
             localStorage.setItem('nx_media', JSON.stringify(this.savedMedia));
             this.renderMediaLib();
@@ -323,71 +360,92 @@ const app = {
         lib.innerHTML = '';
         this.savedMedia.forEach(m => {
             const d = document.createElement('div');
-            d.className = 'lib-item';
+            d.style.cssText = "padding:8px 15px; background:rgba(255,255,255,0.05); border-radius:8px; font-size:11px; cursor:pointer; white-space:nowrap;";
             d.innerText = m.n;
-            d.onclick = () => {
-                document.getElementById('mediaInput').value = m.u;
-                this.loadMedia();
-            };
+            d.onclick = () => { document.getElementById('mediaInput').value = m.u; this.loadMedia(); };
             lib.appendChild(d);
         });
     },
 
-    loadMedia: function() {
-        let val = document.getElementById('mediaInput').value;
-        if(val.includes('youtube.com/watch?v=')) val = val.replace('watch?v=', 'embed/');
-        document.getElementById('mediaFrame').src = val;
-    },
-
     toggleCinema: function() { document.getElementById('mediaBox').classList.toggle('cinema'); },
 
-    setFont: function(f) { document.documentElement.style.setProperty('--font-main', f); },
+    applyTheme: function(t) {
+        localStorage.setItem('nx_theme', t);
+        let ac = '#00f2ff', bg = '#030303';
+        if(t === 'matrix') ac = '#00ff41';
+        if(t === 'retrowave') ac = '#ff00d4';
+        if(t === 'deepsea') { ac = '#00d4ff'; bg = '#000814'; }
+        if(t === 'aura') { ac = '#ffcc00'; bg = '#1a0033'; }
+        document.documentElement.style.setProperty('--accent', ac);
+        if(!localStorage.getItem('nx_custom_bg')) document.documentElement.style.setProperty('--bg', bg);
+    },
+
+    handleBg: function(i) {
+        const r = new FileReader();
+        r.onload = (e) => { document.body.style.backgroundImage = `url(${e.target.result})`; localStorage.setItem('nx_custom_bg', e.target.result); };
+        r.readAsDataURL(i.files[0]);
+    },
+
+    clearBg: function() { localStorage.removeItem('nx_custom_bg'); location.reload(); },
 
     cloak: function(v) {
-        const m = { google: "Google", docs: "My Document", canvas: "Dashboard" };
+        const m = { google: "Google", docs: "My Paper", canvas: "Dashboard" };
         if(m[v]) document.title = m[v];
     },
 
-    softReset: function() {
-        localStorage.removeItem('nx_theme');
-        localStorage.removeItem('nx_custom_bg');
-        localStorage.removeItem('nx_font');
-        location.reload();
-    }
+    switchTab: function(id, btn) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    },
+
+    setFont: function(f) { document.documentElement.style.setProperty('--font-main', f); },
+
+    softReset: function() { localStorage.clear(); location.reload(); }
 };
 
 const particles = {
-    cvs: null, ctx: null, items: [], chars: ['0','1'],
+    cvs: null, ctx: null, items: [], chars: ['0','1'], mode: 'char', img: null,
     init: function() {
         this.cvs = document.getElementById('particleCanvas');
         this.ctx = this.cvs.getContext('2d');
         this.cvs.width = window.innerWidth;
         this.cvs.height = window.innerHeight;
-        this.items = Array.from({length: 45}, () => ({
+        this.generate();
+        this.loop();
+    },
+    generate: function() {
+        this.items = Array.from({length: 50}, () => ({
             x: Math.random() * this.cvs.width,
             y: Math.random() * this.cvs.height,
             v: Math.random() * 1.5 + 0.5,
-            c: this.chars[0]
+            c: this.chars[Math.floor(Math.random()*this.chars.length)]
         }));
-        this.loop();
     },
-    setChars: function(str) {
-        if(str) {
-            this.chars = Array.from(str);
-            this.items.forEach(p => p.c = this.chars[Math.floor(Math.random()*this.chars.length)]);
-        }
+    setChars: function(s) { if(s) { this.chars = Array.from(s); this.mode = 'char'; this.generate(); } },
+    handleUpload: function(i) {
+        const r = new FileReader();
+        r.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => { this.img = img; this.mode = 'img'; };
+        };
+        r.readAsDataURL(i.files[0]);
     },
+    resetMode: function() { this.mode = 'char'; this.chars = ['0','1']; this.generate(); },
     loop: function() {
         this.ctx.clearRect(0,0,this.cvs.width, this.cvs.height);
         this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
         this.ctx.globalAlpha = 0.4;
         this.items.forEach(p => {
             p.y -= p.v;
-            if(p.y < -20) {
-                p.y = this.cvs.height + 20;
-                p.c = this.chars[Math.floor(Math.random()*this.chars.length)];
+            if(p.y < -30) p.y = this.cvs.height + 30;
+            if(this.mode === 'char') {
+                this.ctx.fillText(p.c, p.x, p.y);
+            } else if(this.img) {
+                this.ctx.drawImage(this.img, p.x, p.y, 20, 20);
             }
-            this.ctx.fillText(p.c, p.x, p.y);
         });
         requestAnimationFrame(() => this.loop());
     }
