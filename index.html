@@ -6,6 +6,602 @@
 <title id="siteTitle">‎ </title>
 <link id="siteIcon" rel="icon" href="https://www.google.com/favicon.ico">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400&family=Press+Start+2P&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #030303;
+    --accent: #00f2ff;
+    --sec-accent: #ff0055;
+    --text: #ffffff;
+    --panel-bg: rgba(5,5,5,0.92);
+    --glow: 0 0 20px rgba(0, 242, 255, 0.3);
+    --box-size: 130px;
+    --grid-gap: 20px;
+    --glass-blur: 12px;
+    --cursor-size: 10px;
+    --grid-cols: 5;
+    --radius: 16px;
+    --font-main: 'Plus Jakarta Sans', sans-serif;
+    --font-tech: 'Orbitron', monospace;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Core */
+* { box-sizing: border-box; outline: none; user-select: none; scrollbar-width: thin; scrollbar-color: var(--accent) #111; }
+body {
+    margin: 0; height: 100vh; background: var(--bg); color: var(--text);
+    font-family: var(--font-main); overflow: hidden;
+    background-size: cover; background-position: center; transition: background 0.5s, color 0.5s;
+}
+
+/* Custom Cursor */
+body.custom-cursor * { cursor: none !important; }
+#cursor { position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); display: none; }
+#cursor.active { display: block; }
+#cursor .dot { width: var(--cursor-size); height: var(--cursor-size); background: var(--accent); border-radius: 50%; box-shadow: var(--glow); transition: background 0.3s; }
+#cursor .ring { position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); width: 40px; height: 40px; border: 1px solid var(--accent); border-radius: 50%; opacity: 0.5; transition: 0.1s, border-color 0.3s; }
+body:active #cursor .ring { width: 20px; height: 20px; background: var(--accent); opacity: 0.2; }
+
+/* Effects */
+#particleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(circle, transparent 40%, black 140%); }
+.scanline { position: fixed; inset: 0; z-index: 9000; pointer-events: none; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; display: none; }
+.scanline.active { display: block; }
+
+/* Navigation */
+.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; padding: 12px 25px; z-index: 100; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); border-radius: 0 0 25px 25px; border: 1px solid rgba(255,255,255,0.05); border-top: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.tab { padding: 8px 25px; border-radius: 20px; font-family: var(--font-tech); font-size: 10px; color: #888; transition: 0.3s; cursor: pointer; border: 1px solid transparent; background: transparent; text-transform: uppercase; letter-spacing: 2px; }
+.tab:hover { color: #fff; }
+.tab.active { color: var(--accent); background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); box-shadow: var(--glow); }
+
+/* Views */
+.view { position: absolute; inset: 0; display: none; padding-top: 100px; z-index: 10; flex-direction: column; align-items: center; }
+.view.active { display: flex; animation: fadeUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Search Bar */
+.search-container { position: relative; margin-bottom: 20px; width: 400px; max-width: 90%; z-index: 20; }
+.search-bar { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); padding: 12px 40px; border-radius: 30px; color: white; font-family: var(--font-mono); font-size: 12px; backdrop-filter: blur(10px); transition: 0.3s; }
+.search-bar:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--glow); }
+.search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666; font-size: 12px; }
+
+/* Grid */
+.grid-container { overflow-y: auto; max-height: 80vh; width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 50px; }
+.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: var(--grid-gap); padding: 20px; }
+.box {
+    position: relative; width: var(--box-size); height: var(--box-size);
+    background: rgba(255,255,255,0.03); backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-decoration: none; transition: 0.3s; overflow: hidden; cursor: pointer;
+}
+.box:hover { border-color: var(--accent); transform: translateY(-5px) scale(1.02); box-shadow: var(--glow); background: rgba(255,255,255,0.08); }
+.box i { font-size: 28px; color: #ccc; margin-bottom: 15px; transition: 0.3s; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
+.box:hover i { color: var(--accent); transform: scale(1.1); filter: drop-shadow(0 0 8px var(--accent)); }
+.box span { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: #fff; text-align: center; opacity: 0.8; }
+.del-btn { position: absolute; top: 8px; right: 8px; color: #ff4444; font-size: 12px; opacity: 0; transition: 0.2s; z-index: 5; }
+.box:hover .del-btn { opacity: 1; }
+
+/* IMPROVED MEDIA SECTION */
+.media-container {
+    width: 90%; max-width: 1000px; height: 75vh;
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1); background: #000;
+    display:flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    position: relative; transition: 0.5s;
+}
+.media-container.cinema-mode {
+    position: fixed; inset: 0; width: 100%; height: 100%; max-width: 100%; z-index: 9999; border: none; border-radius: 0;
+}
+iframe { width: 100%; height: 100%; border: none; background: #000; flex-grow: 1; }
+.media-bar { padding: 15px; background: #080808; border-top: 1px solid #222; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.visualizer { display: flex; gap: 3px; height: 20px; align-items: flex-end; margin-right: 15px; }
+.bar { width: 4px; background: var(--accent); animation: bounce 1s infinite ease-in-out; }
+@keyframes bounce { 0%, 100% { height: 5px; } 50% { height: 20px; } }
+
+/* Widgets Area */
+.widget-area { position: fixed; top: 20px; right: 30px; text-align: right; z-index: 50; display: flex; flex-direction: column; gap: 2px; pointer-events: none; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+.clock { font-family: var(--font-tech); font-size: 32px; color: var(--text); font-weight: 700; letter-spacing: 1px; }
+.date { font-size: 11px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; }
+.sys-stat { font-family: var(--font-mono); font-size: 10px; color: var(--sec-accent); margin-top: 5px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 4px; display: none; border: 1px solid rgba(255,255,255,0.1); }
+
+/* Sidebar */
+.sidebar-btn { position: fixed; bottom: 25px; right: 25px; z-index: 200; font-size: 18px; color: var(--text); background: rgba(20,20,20,0.6); padding: 15px; border-radius: 50%; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.sidebar-btn:hover { color: var(--accent); border-color: var(--accent); transform: rotate(180deg); }
+
+.sidebar {
+    position: fixed; top: 0; right: -420px; width: 380px; height: 100%;
+    background: var(--panel-bg); backdrop-filter: blur(40px); z-index: 5000;
+    padding: 0; transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    border-left: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column;
+}
+.sidebar.open { right: 0; box-shadow: -50px 0 100px rgba(0,0,0,0.8); }
+
+.sb-header { padding: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+.sb-title { font-family: var(--font-tech); font-size: 16px; color: var(--accent); letter-spacing: 3px; }
+.sb-content { flex-grow: 1; overflow-y: auto; padding: 25px; }
+
+details { margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.3); }
+summary { padding: 15px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #ccc; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+summary:hover { color: #fff; background: rgba(255,255,255,0.03); }
+details[open] summary { border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--accent); }
+
+.control-group { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #999; }
+
+input, select, .btn { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 6px; font-size: 11px; width: 100%; margin-top: 5px; font-family: var(--font-main); transition: 0.2s; }
+.btn { cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; text-align: center; border-color: #444; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-accent { background: var(--accent); color: #000; border: none; }
+.btn-accent:hover { background: #fff; box-shadow: var(--glow); color: #000; }
+.btn-red { color: #ff5555; border-color: #552222; }
+.btn-red:hover { background: #331111; border-color: #ff5555; }
+.btn-sm { width: auto; padding: 5px 10px; font-size: 9px; }
+
+/* Panic States */
+#panicOverlay { position: fixed; inset: 0; background: #fff; z-index: 99999; display: none; align-items: center; justify-content: center; color: #000; font-family: serif; }
+#fakeError { position: fixed; inset: 0; background: #0000aa; color: #fff; font-family: monospace; z-index: 99999; display: none; padding: 50px; font-size: 18px; line-height: 1.5; }
+</style>
+</head>
+<body class="custom-cursor">
+
+<div id="cursor"><div class="dot"></div><div class="ring"></div></div>
+<div class="vignette"></div>
+<div class="scanline"></div>
+<canvas id="particleCanvas"></canvas>
+
+<div id="panicOverlay"><h1>404 Not Found</h1></div>
+<div id="fakeError">
+<p>A fatal exception 0E has occurred at 0028:C0034B23. The current application will be terminated.</p>
+</div>
+
+<div class="tab-bar">
+    <button class="tab active" onclick="app.switchTab('home', this)">HUB</button>
+    <button class="tab" onclick="app.switchTab('media', this)">MEDIA</button>
+</div>
+
+<div class="widget-area">
+    <div id="widgetClock" class="clock">00:00</div>
+    <div id="widgetDate" class="date">LOADING...</div>
+    <div id="widgetSys" class="sys-stat">CPU: 12% RAM: 4GB</div>
+</div>
+
+<div id="home" class="view active">
+    <div class="search-container">
+        <i class="fas fa-terminal search-icon"></i>
+        <input type="text" class="search-bar" placeholder="Terminal Search (Enter to Google)...">
+    </div>
+    <div class="grid-container">
+        <div class="grid" id="grid"></div>
+    </div>
+</div>
+
+<div id="media" class="view">
+    <div class="media-container" id="mediaBox">
+        <iframe id="mediaFrame" src="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+        <div class="media-bar">
+            <div class="visualizer">
+                <div class="bar" style="animation-delay:0s"></div>
+                <div class="bar" style="animation-delay:0.2s"></div>
+                <div class="bar" style="animation-delay:0.4s"></div>
+            </div>
+            <input type="text" id="mediaInput" placeholder="Spotify/YouTube URL..." style="margin:0; flex-grow:1;">
+            <button class="btn btn-accent" style="width: auto; margin:0;" onclick="app.loadMedia()">PLAY</button>
+            <button class="btn" style="width: auto; margin:0;" onclick="document.getElementById('mediaBox').classList.toggle('cinema-mode')"><i class="fas fa-expand"></i></button>
+        </div>
+        <div class="media-bar" style="border-top:none; padding-top:0; gap:5px;">
+             <span style="font-size:10px; color:#666;">QUICK:</span>
+             <button class="btn btn-sm" onclick="app.quickPlay('lofi')">LOFI GIRL</button>
+             <button class="btn btn-sm" onclick="app.quickPlay('chill')">CHILLHOP</button>
+             <button class="btn btn-sm" onclick="app.quickPlay('rain')">RAIN SOUNDS</button>
+        </div>
+    </div>
+</div>
+
+<i class="fas fa-sliders-h sidebar-btn" onclick="document.getElementById('sidebar').classList.add('open')"></i>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sb-header">
+        <span class="sb-title">SYSTEM // CONFIG</span>
+        <i class="fas fa-times" style="cursor:pointer; color:#666;" onclick="document.getElementById('sidebar').classList.remove('open')"></i>
+    </div>
+
+    <div class="sb-content">
+        <details open>
+            <summary>Appearance & Fonts</summary>
+            <div class="control-group">
+                <span class="row">Select Preset Theme</span>
+                <select id="presetSel" onchange="app.applyTheme(this.value)">
+                    <option value="cyberpunk">Cyberpunk (Default)</option>
+                    <option value="matrix">The Matrix (Code)</option>
+                    <option value="retrowave">Retrowave (Sunset)</option>
+                    <option value="zen">Zen (Clean)</option>
+                    <option value="inferno">Inferno (Fire)</option>
+                    <option value="void">Void (Space)</option>
+                </select>
+               
+                <span class="row">System Font</span>
+                <select id="fontSel" onchange="app.setFont(this.value)">
+                    <option value="'Plus Jakarta Sans', sans-serif">Standard (Jakarta)</option>
+                    <option value="'Orbitron', monospace">Tech (Orbitron)</option>
+                    <option value="'JetBrains Mono', monospace">Coder (Mono)</option>
+                    <option value="'Press Start 2P', cursive">Retro (Pixel)</option>
+                    <option value="'Cinzel', serif">Royal (Serif)</option>
+                </select>
+
+                <div class="row"><span>Accent Color</span><input type="color" id="accentPick" style="width:50px; height:30px; padding:0;" onchange="app.setAccent(this.value)"></div>
+            </div>
+        </details>
+
+        <details>
+            <summary>Particle Lab</summary>
+            <div class="control-group">
+                <div class="row"><span>Amount</span><input type="range" min="0" max="200" value="60" oninput="particles.updateCount(this.value)"></div>
+               
+                <span class="row">Custom Emoji Particle</span>
+                <input type="text" maxlength="2" placeholder="Type emoji (e.g. 🔥)" oninput="particles.setMode('emoji', this.value)">
+               
+                <span class="row">Or Upload Image</span>
+                <input type="file" accept="image/*" onchange="particles.handleUpload(this)">
+
+                <button class="btn" onclick="particles.setMode('default')">Reset to Theme Default</button>
+            </div>
+        </details>
+
+        <details>
+            <summary>Grid Management</summary>
+            <div class="control-group">
+                <div class="row"><span>Edit Mode</span><input type="checkbox" id="editMode" onchange="app.toggleEditMode(this.checked)"></div>
+                <input type="text" id="newTitle" placeholder="Link Title">
+                <input type="url" id="newUrl" placeholder="Link URL">
+                <button class="btn btn-accent" onclick="app.addLink()">Add Link</button>
+                <div class="row"><span>Columns</span><input type="range" min="2" max="8" value="5" oninput="app.setCSS('--grid-cols', this.value)"></div>
+            </div>
+        </details>
+
+        <details>
+            <summary>Stealth & Cloak</summary>
+            <div class="control-group">
+                <select onchange="app.cloak(this.value)">
+                    <option value="">-- Disguise Tab --</option>
+                    <option value="google">Google Classroom</option>
+                    <option value="canvas">Canvas LMS</option>
+                    <option value="docs">Google Docs</option>
+                </select>
+                <button class="btn btn-red" onclick="app.triggerPanic()">PANIC BUTTON (F9)</button>
+            </div>
+        </details>
+
+        <details>
+            <summary>System</summary>
+            <div class="control-group">
+                <div class="row"><span>Show Stats</span><input type="checkbox" onchange="document.getElementById('widgetSys').style.display = this.checked ? 'block' : 'none'"></div>
+                <div class="row"><span>Custom Cursor</span><input type="checkbox" checked onchange="document.body.classList.toggle('custom-cursor', this.checked)"></div>
+                <button class="btn btn-red" onclick="app.factoryReset()">FACTORY RESET</button>
+            </div>
+        </details>
+    </div>
+</aside>
+
+<script>
+const defaultLinks = [
+    { n: "Nexora", u: "https://mathematicss.global.ssl.fastly.net" },
+    { n: "Luminal", u: "https://sciencea.global.ssl.fastly.net" },
+    { n: "Google", u: "https://google.com" },
+    { n: "Discord", u: "https://discord.com/app" }
+];
+
+const app = {
+    links: [],
+    theme: 'cyberpunk',
+
+    init: function() {
+        const savedLinks = localStorage.getItem('nx_links');
+        this.links = savedLinks ? JSON.parse(savedLinks) : defaultLinks;
+       
+        const savedTheme = localStorage.getItem('nx_theme') || 'cyberpunk';
+        this.applyTheme(savedTheme);
+        document.getElementById('presetSel').value = savedTheme;
+
+        // Load Font
+        const savedFont = localStorage.getItem('nx_font');
+        if(savedFont) {
+            this.setCSS('--font-main', savedFont);
+            document.getElementById('fontSel').value = savedFont;
+        }
+
+        this.renderGrid(this.links);
+        this.startWidgets();
+        this.initCursor();
+        particles.init();
+
+        // Search Listener
+        document.querySelector('.search-bar').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const q = e.target.value;
+                const match = this.links.find(l => l.n.toLowerCase().includes(q.toLowerCase()));
+                if(match) window.open(match.u, '_blank');
+                else window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, '_blank');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F9') this.triggerPanic();
+            if (e.key === 'Escape') this.clearPanic();
+        });
+    },
+
+    renderGrid: function(list) {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        list.forEach((l, i) => {
+            const box = document.createElement('div');
+            box.className = 'box';
+            box.onclick = (e) => {
+                if(e.target.classList.contains('del-btn') || e.target.parentElement.classList.contains('del-btn')) {
+                    this.deleteLink(i);
+                } else {
+                    window.open(l.u, '_blank');
+                }
+            };
+           
+            let ico = 'fa-globe';
+            const low = l.n.toLowerCase();
+            if(low.includes('movie') || low.includes('tube')) ico = 'fa-film';
+            else if(low.includes('game') || low.includes('play')) ico = 'fa-gamepad';
+            else if(low.includes('discord')) ico = 'fa-brands fa-discord';
+            else if(low.includes('music')) ico = 'fa-music';
+
+            box.innerHTML = `<div class="del-btn"><i class="fas fa-trash"></i></div><i class="fas ${ico}"></i><span>${l.n}</span>`;
+            grid.appendChild(box);
+        });
+    },
+
+    addLink: function() {
+        const n = document.getElementById('newTitle').value;
+        const u = document.getElementById('newUrl').value;
+        if(n && u) {
+            this.links.push({n, u});
+            localStorage.setItem('nx_links', JSON.stringify(this.links));
+            this.renderGrid(this.links);
+        }
+    },
+
+    deleteLink: function(index) {
+        this.links.splice(index, 1);
+        localStorage.setItem('nx_links', JSON.stringify(this.links));
+        this.renderGrid(this.links);
+    },
+
+    toggleEditMode: function(on) {
+        const style = document.getElementById('editStyle') || document.createElement('style');
+        style.id = 'editStyle';
+        style.innerHTML = on ? '.del-btn { opacity: 1 !important; }' : '';
+        document.head.appendChild(style);
+    },
+
+    // MEDIA PLAYER ENHANCED
+    loadMedia: function() {
+        let url = document.getElementById('mediaInput').value.trim();
+        if(!url) return;
+        let embedUrl = url;
+
+        if (url.includes('spotify.com')) {
+            embedUrl = url.replace('/track/', '/embed/track/').replace('/playlist/', '/embed/playlist/');
+        } else if (url.includes('youtube.com/watch')) {
+            const vid = new URL(url).searchParams.get('v');
+            embedUrl = `https://www.youtube.com/embed/${vid}?autoplay=1`;
+        } else if (url.includes('youtu.be/')) {
+            const vid = url.split('youtu.be/')[1].split('?')[0];
+            embedUrl = `https://www.youtube.com/embed/${vid}?autoplay=1`;
+        }
+        document.getElementById('mediaFrame').src = embedUrl;
+    },
+
+    quickPlay: function(type) {
+        const urls = {
+            lofi: "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1",
+            chill: "https://www.youtube.com/embed/5yx6BWlEVcY?autoplay=1",
+            rain: "https://www.youtube.com/embed/mPZkdNFkNps?autoplay=1"
+        };
+        document.getElementById('mediaFrame').src = urls[type];
+    },
+
+    // THEME ENGINE 2.0
+    setCSS: function(k, v) { document.documentElement.style.setProperty(k, v); },
+    setAccent: function(c) { this.setCSS('--accent', c); this.setCSS('--glow', `0 0 20px ${c}44`); },
+    setFont: function(f) { this.setCSS('--font-main', f); localStorage.setItem('nx_font', f); },
+
+    applyTheme: function(name) {
+        this.theme = name;
+        localStorage.setItem('nx_theme', name);
+        const sl = document.querySelector('.scanline');
+        sl.classList.remove('active');
+       
+        // Defaults
+        let bg='#030303', ac='#00f2ff', font='Orbitron';
+
+        if(name === 'cyberpunk') {
+            bg='#030303'; ac='#00f2ff'; sl.classList.add('active');
+        } else if(name === 'matrix') {
+            bg='#000'; ac='#00ff41'; sl.classList.add('active');
+        } else if(name === 'retrowave') {
+            bg='#180c2e'; ac='#ff00d4'; // Purple/Pink
+        } else if(name === 'zen') {
+            bg='#e0e0e0'; ac='#555'; // Light Mode
+            this.setCSS('--text', '#222');
+            this.setCSS('--panel-bg', 'rgba(255,255,255,0.9)');
+        } else if(name === 'inferno') {
+            bg='#110500'; ac='#ff4d00';
+        } else if(name === 'void') {
+            bg='#080808'; ac='#ffffff';
+        }
+
+        if(name !== 'zen') {
+            this.setCSS('--text', '#ffffff');
+            this.setCSS('--panel-bg', 'rgba(5,5,5,0.92)');
+        }
+
+        this.setCSS('--bg', bg);
+        this.setAccent(ac);
+        particles.init();
+    },
+
+    cloak: function(type) {
+        const maps = {
+            google: { t: "Classes", i: "https://ssl.gstatic.com/classroom/favicon.png" },
+            canvas: { t: "Dashboard", i: "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico" },
+            docs: { t: "My Essay", i: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" }
+        };
+        if(maps[type]) {
+            document.title = maps[type].t;
+            document.getElementById('siteIcon').href = maps[type].i;
+        }
+    },
+
+    triggerPanic: function() { document.getElementById('fakeError').style.display = 'block'; },
+    clearPanic: function() { document.getElementById('fakeError').style.display = 'none'; },
+
+    startWidgets: function() {
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('widgetClock').innerText = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('widgetDate').innerText = d.toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'});
+            if(Math.random() > 0.8) {
+                document.getElementById('widgetSys').innerText = `CPU: ${Math.floor(Math.random()*30)}% RAM: ${(Math.random()*2+2).toFixed(1)}GB`;
+            }
+        }, 1000);
+    },
+
+    switchTab: function(id, btn) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    },
+
+    initCursor: function() {
+        const c = document.getElementById('cursor');
+        window.onmousemove = e => {
+            c.style.left = e.clientX+'px'; c.style.top = e.clientY+'px';
+            c.classList.add('active');
+        };
+    },
+
+    factoryReset: function() {
+        if(confirm('Wipe everything?')) { localStorage.clear(); location.reload(); }
+    }
+};
+
+// ADVANCED PARTICLE SYSTEM
+const particles = {
+    cvs: null, ctx: null, items: [], count: 60, mode: 'default', customEmoji: '', customImg: null,
+   
+    init: function() {
+        this.cvs = document.getElementById('particleCanvas');
+        this.ctx = this.cvs.getContext('2d');
+        this.cvs.width = window.innerWidth;
+        this.cvs.height = window.innerHeight;
+        this.generate();
+    },
+
+    updateCount: function(val) {
+        this.count = parseInt(val);
+        this.generate();
+    },
+
+    setMode: function(m, val) {
+        this.mode = m;
+        if(m === 'emoji') this.customEmoji = val;
+        this.generate();
+    },
+
+    handleUpload: function(input) {
+        if(input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    this.customImg = img;
+                    this.mode = 'image';
+                    this.generate();
+                };
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    },
+
+    generate: function() {
+        this.items = [];
+        for(let i=0; i<this.count; i++) {
+            this.items.push({
+                x: Math.random() * this.cvs.width,
+                y: Math.random() * this.cvs.height,
+                s: Math.random() * 2 + 1,
+                sp: Math.random() * 2 + 0.5,
+                char: String.fromCharCode(0x30A0 + Math.random()*96)
+            });
+        }
+    },
+
+    loop: function() {
+        this.ctx.clearRect(0,0,this.cvs.width, this.cvs.height);
+        const t = app.theme;
+        this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+       
+        this.items.forEach(p => {
+            // MOVEMENT
+            if(t === 'matrix' || t === 'rain') {
+                p.y += p.sp * 3;
+                if(p.y > this.cvs.height) p.y = -20;
+            } else if (t === 'retrowave') {
+                p.y += 0.5; p.x -= 0.5;
+                if(p.y > this.cvs.height) p.y = 0;
+                if(p.x < 0) p.x = this.cvs.width;
+            } else {
+                p.y -= p.sp * 0.5;
+                if(p.y < 0) p.y = this.cvs.height;
+            }
+
+            // DRAWING
+            if(this.mode === 'emoji' && this.customEmoji) {
+                this.ctx.font = '16px serif';
+                this.ctx.fillText(this.customEmoji, p.x, p.y);
+            } else if (this.mode === 'image' && this.customImg) {
+                this.ctx.drawImage(this.customImg, p.x, p.y, 20, 20);
+            } else {
+                // Default Theme Logic
+                if(t === 'matrix') {
+                    this.ctx.font = '14px monospace';
+                    this.ctx.fillText(p.char, p.x, p.y);
+                } else if(t === 'zen') {
+                     this.ctx.fillStyle = "#888";
+                     this.ctx.beginPath(); this.ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); this.ctx.fill();
+                } else {
+                    this.ctx.beginPath(); this.ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); this.ctx.fill();
+                }
+            }
+        });
+        requestAnimationFrame(() => this.loop());
+    }
+};
+
+window.onload = () => { app.init(); particles.loop(); };
+window.onresize = () => particles.init();
+</script>
+</body>
+</html>
+
+On Wed, Feb 11, 2026 at 10:42 PM Jonathan Vega Hernandez <jonathan.vegahernandez@stu.northampton-k12.us> wrote:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="siteTitle">‎ </title>
+<link id="siteIcon" rel="icon" href="https://www.google.com/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 :root {
