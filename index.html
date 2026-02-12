@@ -6,18 +6,16 @@
 <title id="siteTitle">‎ </title>
 <link id="siteIcon" rel="icon" href="https://www.google.com/favicon.ico">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400&family=Press+Start+2P&family=Cinzel:wght@400;700&family=Bangers&family=Creepster&family=Dancing+Script&display=swap" rel="stylesheet">
 <style>
 :root {
     --bg: #030303;
     --accent: #00f2ff;
-    --sec-accent: #ff0055;
     --text: #ffffff;
-    --panel-bg: rgba(5,5,5,0.92);
+    --panel-bg: rgba(5,5,5,0.85);
     --glow: 0 0 20px rgba(0, 242, 255, 0.3);
     --box-size: 130px;
-    --grid-gap: 20px;
-    --glass-blur: 12px;
     --grid-cols: 5;
     --radius: 16px;
     --font-main: 'Plus Jakarta Sans', sans-serif;
@@ -29,8 +27,8 @@
 body {
     margin: 0; height: 100vh; background: var(--bg); color: var(--text);
     font-family: var(--font-main); overflow: hidden;
+    background-size: cover; background-position: center;
     transition: background 0.5s, color 0.5s;
-    background-size: cover !important; background-position: center !important;
 }
 
 body.custom-cursor * { cursor: none !important; }
@@ -38,122 +36,126 @@ body.custom-cursor * { cursor: none !important; }
 #cursor.active { display: block; }
 #cursor .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: var(--glow); }
 
-/* Grid Animations */
-@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+/* Math Helper Overlay */
+#mathHelper {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+    z-index: 10000; display: none; align-items: center; justify-content: center;
+}
+.math-card {
+    background: var(--panel-bg); width: 450px; padding: 30px; border-radius: 20px;
+    border: 1px solid var(--accent); box-shadow: var(--glow); text-align: center;
+}
+#mathInput { width: 100%; background: #111; border: 1px solid #333; color: var(--accent); padding: 15px; border-radius: 10px; font-family: 'JetBrains Mono'; font-size: 18px; margin-top: 15px; }
+#mathResult { margin-top: 20px; font-size: 24px; font-weight: bold; color: #fff; min-height: 30px; }
 
 /* Views */
-.view { position: absolute; inset: 0; display: none; padding-top: 100px; z-index: 10; flex-direction: column; align-items: center; overflow-y: auto; padding-bottom: 50px; }
+.view { position: absolute; inset: 0; display: none; padding-top: 100px; z-index: 10; flex-direction: column; align-items: center; }
 .view.active { display: flex; animation: fadeUp 0.4s ease-out; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Boxes */
-.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: var(--grid-gap); padding: 20px; }
+/* Grid */
+.grid { display: grid; grid-template-columns: repeat(var(--grid-cols), var(--box-size)); gap: 20px; padding: 20px; }
 .box {
     position: relative; width: var(--box-size); height: var(--box-size);
-    background: rgba(255,255,255,0.03); backdrop-filter: blur(var(--glass-blur));
+    background: rgba(255,255,255,0.03); backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius);
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     animation: float 4s ease-in-out infinite;
 }
-.box:hover {
-    border-color: var(--accent); transform: scale(1.1);
-    box-shadow: var(--glow); background: rgba(255,255,255,0.1);
-}
+.box:hover { border-color: var(--accent); transform: scale(1.1); box-shadow: var(--glow); background: rgba(255,255,255,0.1); }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
-/* Tab Bar */
-.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; padding: 10px; z-index: 100; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); border-radius: 0 0 20px 20px; border: 1px solid rgba(255,255,255,0.1); }
-.tab { padding: 8px 20px; border-radius: 12px; font-family: var(--font-tech); font-size: 10px; color: #666; cursor: pointer; border: none; background: transparent; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-.tab.active { color: var(--accent); text-shadow: var(--glow); background: rgba(255,255,255,0.05); }
+/* Media Section */
+.media-container { width: 90%; max-width: 1000px; height: 60vh; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; display:flex; flex-direction: column; }
+.media-lib { width: 90%; max-width: 1000px; margin-top: 20px; display: flex; gap: 10px; overflow-x: auto; padding: 10px; }
+.lib-item { padding: 8px 15px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 11px; cursor: pointer; white-space: nowrap; border: 1px solid transparent; }
+.lib-item:hover { border-color: var(--accent); color: var(--accent); }
 
-/* Games View Style */
-.game-container { background: rgba(0,0,0,0.7); border: 1px solid var(--accent); border-radius: 20px; padding: 40px; text-align: center; width: 400px; box-shadow: var(--glow); }
-.clicker-btn { width: 120px; height: 120px; border-radius: 50%; background: transparent; border: 4px solid var(--accent); color: var(--accent); font-size: 30px; cursor: pointer; transition: 0.1s; margin: 20px 0; box-shadow: inset 0 0 15px var(--accent); }
-.clicker-btn:active { transform: scale(0.9); background: var(--accent); color: #000; }
-.shop { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-
-/* Sidebar */
+/* Sidebar & Form Elements */
 .sidebar { position: fixed; top: 0; right: -400px; width: 350px; height: 100%; background: var(--panel-bg); backdrop-filter: blur(30px); z-index: 5000; transition: 0.4s; border-left: 1px solid rgba(255,255,255,0.1); padding: 25px; overflow-y: auto; }
 .sidebar.open { right: 0; }
-.sb-section { margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+.sb-section { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+input, select, .btn { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; font-size: 11px; width: 100%; margin-top: 8px; }
+.btn-accent { background: var(--accent); color: #000; font-weight: bold; border: none; cursor: pointer; }
 
-input, select, .btn { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; font-size: 11px; width: 100%; margin-top: 8px; cursor: pointer; }
-.btn-accent { background: var(--accent); color: #000; font-weight: bold; border: none; }
+.tab-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; padding: 10px; z-index: 100; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 0 0 20px 20px; }
+.tab { padding: 8px 20px; border-radius: 15px; font-family: var(--font-tech); font-size: 10px; color: #666; cursor: pointer; border: none; background: transparent; }
+.tab.active { color: var(--accent); background: rgba(255,255,255,0.05); }
 </style>
 </head>
-<body class="custom-cursor" id="mainBody">
+<body class="custom-cursor">
 
 <div id="cursor"><div class="dot"></div></div>
 <canvas id="particleCanvas" style="position:fixed; inset:0; pointer-events:none; z-index:1;"></canvas>
 
+<div id="mathHelper">
+    <div class="math-card">
+        <h2 style="font-family: var(--font-tech); color: var(--accent); margin:0;">MATH_SOLVER_V1</h2>
+        <p style="font-size: 10px; opacity: 0.6;">TYPE PROBLEM & PRESS ENTER (ESC TO CLOSE)</p>
+        <input type="text" id="mathInput" placeholder="e.g. sqrt(25) * sin(45 deg)">
+        <div id="mathResult">Ready...</div>
+    </div>
+</div>
+
 <div class="tab-bar">
     <button class="tab active" onclick="app.switchTab('home', this)">SYSTEM</button>
     <button class="tab" onclick="app.switchTab('media', this)">THEATER</button>
-    <button class="tab" onclick="app.switchTab('games', this)">GAMES</button>
 </div>
 
 <div id="home" class="view active">
     <div style="margin-bottom: 30px; width: 400px;">
-        <input type="text" id="mainSearch" placeholder="Search Command..." style="border-radius: 30px; padding: 12px 25px; background: rgba(0,0,0,0.5); border: 1px solid var(--accent);">
+        <input type="text" id="mainSearch" placeholder="Terminal Search..." style="border-radius: 30px; padding: 12px 25px;">
     </div>
     <div class="grid" id="grid"></div>
 </div>
 
 <div id="media" class="view">
-    <div style="width: 90%; max-width: 900px; height: 60vh; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222;">
-        <iframe id="mediaFrame" style="width: 100%; height: 100%; border:none;"></iframe>
-    </div>
-    <div style="margin-top: 20px; width: 400px; display: flex; gap: 10px;">
-        <input type="text" id="mediaInput" placeholder="Enter URL...">
-        <button class="btn-accent" style="width: 80px;" onclick="app.loadMedia()">PLAY</button>
-    </div>
-</div>
-
-<div id="games" class="view">
-    <div class="game-container">
-        <h2 style="font-family: var(--font-tech); color: var(--accent);">BITMINER V1</h2>
-        <div style="font-size: 24px; font-family: 'JetBrains Mono'; margin: 10px 0;">BITS: <span id="bitCount">0</span></div>
-        <button class="clicker-btn" onclick="game.click()">⚡</button>
-        <div class="shop">
-            <button class="btn" onclick="game.buy('cpu')">Upgrade CPU (+1/click) | Cost: <span id="cpuCost">15</span></button>
-            <button class="btn" onclick="game.buy('auto')">Auto-Miner (+2/sec) | Cost: <span id="autoCost">50</span></button>
+    <div class="media-container" id="mediaBox">
+        <iframe id="mediaFrame" src="" allow="autoplay; encrypted-media; fullscreen"></iframe>
+        <div style="padding: 10px; background: #0a0a0a; display: flex; gap: 10px;">
+            <input type="text" id="mediaInput" placeholder="Paste YouTube/Spotify URL..." style="margin:0;">
+            <button class="btn-accent" style="width: 80px; margin:0;" onclick="app.loadMedia()">LOAD</button>
+            <button class="btn-accent" style="width: 80px; margin:0; background:#333; color:#fff;" onclick="app.saveMedia()">SAVE</button>
         </div>
     </div>
+    <div class="media-lib" id="mediaLib">
+        </div>
 </div>
 
-<i class="fas fa-cog" style="position:fixed; bottom:25px; right:25px; z-index:200; cursor:pointer; opacity:0.5;" onclick="document.getElementById('sidebar').classList.toggle('open')"></i>
+<i class="fas fa-sliders-h" style="position:fixed; bottom:25px; right:25px; z-index:200; cursor:pointer;" onclick="document.getElementById('sidebar').classList.toggle('open')"></i>
 
 <aside class="sidebar" id="sidebar">
     <div class="sb-section">
-        <h3 style="font-family: var(--font-tech); font-size: 11px; color: var(--accent);">WALLPAPER ENGINE</h3>
-        <input type="file" accept="image/*" onchange="app.uploadBg(this)">
-        <button class="btn" onclick="app.clearBg()">Clear Custom BG</button>
+        <h3 style="font-family: var(--font-tech); font-size: 11px; color: var(--accent);">WALLPAPER</h3>
+        <input type="file" accept="image/*" onchange="app.handleBg(this)">
+        <button class="btn" style="margin-top:10px;" onclick="app.clearBg()">Remove Background</button>
     </div>
 
     <div class="sb-section">
-        <h3 style="font-family: var(--font-tech); font-size: 11px; color: var(--accent);">THEMES & FONTS</h3>
+        <h3 style="font-family: var(--font-tech); font-size: 11px; color: var(--accent);">VISUALS</h3>
         <select onchange="app.applyTheme(this.value)">
             <option value="cyberpunk">Cyberpunk</option>
             <option value="matrix">Matrix</option>
             <option value="retrowave">Retrowave</option>
             <option value="deepsea">Deep Sea</option>
-            <option value="void">Void</option>
+            <option value="aura">Aura</option>
         </select>
         <select onchange="app.setFont(this.value)" style="margin-top:10px;">
-            <option value="'Plus Jakarta Sans'">Modern</option>
-            <option value="'Orbitron'">Tech</option>
-            <option value="'Press Start 2P'">Retro</option>
+            <option value="'Plus Jakarta Sans'">Jakarta</option>
+            <option value="'Orbitron'">Orbitron</option>
+            <option value="'Press Start 2P'">Pixel</option>
             <option value="'Creepster'">Horror</option>
         </select>
     </div>
 
     <div class="sb-section">
         <h3 style="font-family: var(--font-tech); font-size: 11px; color: var(--accent);">PARTICLES</h3>
-        <input type="text" id="partChars" placeholder="e.g. ⚡🔥✨" oninput="particles.setChars(this.value)">
+        <input type="text" placeholder="Characters (e.g. 👾🔥01)" oninput="particles.setChars(this.value)">
     </div>
 
     <div class="sb-section">
-        <button class="btn-accent" style="background:#ff4444; color:#fff;" onclick="app.softReset()">RESET SETTINGS</button>
+        <button class="btn" style="color:#ff5555; border-color:#552222;" onclick="app.softReset()">RESET SETTINGS</button>
     </div>
 </aside>
 
@@ -161,34 +163,49 @@ input, select, .btn { background: #111; border: 1px solid #333; color: white; pa
 const app = {
     links: JSON.parse(localStorage.getItem('nx_links')) || [
         { n: "Google", u: "https://google.com" },
-        { n: "YouTube", u: "https://youtube.com" },
-        { n: "Discord", u: "https://discord.com" },
-        { n: "Reddit", u: "https://reddit.com" }
+        { n: "YouTube", u: "https://youtube.com" }
     ],
+    savedMedia: JSON.parse(localStorage.getItem('nx_media')) || [],
 
     init: function() {
         this.renderGrid();
+        this.renderMediaLib();
         this.applyTheme(localStorage.getItem('nx_theme') || 'cyberpunk');
-        const savedBg = localStorage.getItem('nx_customBg');
-        if(savedBg) document.getElementById('mainBody').style.background = `url(${savedBg})`;
        
-        particles.init();
-        game.init();
+        // Load background
+        const bg = localStorage.getItem('nx_custom_bg');
+        if(bg) document.body.style.backgroundImage = `url(${bg})`;
 
+        particles.init();
+
+        // Listeners
+        window.addEventListener('keydown', (e) => {
+            if(e.key.toLowerCase() === 's' && document.activeElement.tagName !== 'INPUT') {
+                document.getElementById('mathHelper').style.display = 'flex';
+                document.getElementById('mathInput').focus();
+            }
+            if(e.key === 'Escape') {
+                document.getElementById('mathHelper').style.display = 'none';
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        });
+
+        document.getElementById('mathInput').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') this.solveMath();
+        });
+
+        // Search
         document.getElementById('mainSearch').addEventListener('keypress', (e) => {
             if(e.key === 'Enter') window.open('https://google.com/search?q=' + e.target.value);
         });
 
+        // Cursor
         const c = document.getElementById('cursor');
         window.onmousemove = e => {
             c.style.left = e.clientX + 'px';
             c.style.top = e.clientY + 'px';
             c.style.display = 'block';
         };
-
-        window.addEventListener('keydown', (e) => {
-            if(e.key === 'F9') window.location.href = "https://google.com";
-        });
     },
 
     renderGrid: function() {
@@ -201,6 +218,70 @@ const app = {
             b.onclick = () => window.open(l.u, '_blank');
             g.appendChild(b);
         });
+    },
+
+    handleBg: function(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = e.target.result;
+                document.body.style.backgroundImage = `url(${data})`;
+                localStorage.setItem('nx_custom_bg', data);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    },
+
+    clearBg: function() {
+        localStorage.removeItem('nx_custom_bg');
+        document.body.style.backgroundImage = 'none';
+    },
+
+    saveMedia: function() {
+        const url = document.getElementById('mediaInput').value;
+        if(!url) return;
+        const name = prompt("Name for this link?");
+        if(name) {
+            this.savedMedia.push({n: name, u: url});
+            localStorage.setItem('nx_media', JSON.stringify(this.savedMedia));
+            this.renderMediaLib();
+        }
+    },
+
+    renderMediaLib: function() {
+        const lib = document.getElementById('mediaLib');
+        lib.innerHTML = '';
+        this.savedMedia.forEach(m => {
+            const d = document.createElement('div');
+            d.className = 'lib-item';
+            d.innerText = m.n;
+            d.onclick = () => {
+                document.getElementById('mediaInput').value = m.u;
+                this.loadMedia();
+            };
+            lib.appendChild(d);
+        });
+    },
+
+    solveMath: function() {
+        const input = document.getElementById('mathInput').value;
+        const resDiv = document.getElementById('mathResult');
+        try {
+            const result = math.evaluate(input);
+            resDiv.innerText = "= " + result;
+            resDiv.style.color = "var(--accent)";
+        } catch (e) {
+            resDiv.innerText = "Error in Expression";
+            resDiv.style.color = "#ff4444";
+        }
+    },
+
+    loadMedia: function() {
+        let val = document.getElementById('mediaInput').value;
+        if(val.includes('youtube.com/watch?v=')) {
+            val = val.replace('watch?v=', 'embed/');
+        }
+        document.getElementById('mediaFrame').src = val;
     },
 
     switchTab: function(id, btn) {
@@ -216,73 +297,18 @@ const app = {
         if(t === 'matrix') ac = '#00ff41';
         if(t === 'retrowave') ac = '#ff00d4';
         if(t === 'deepsea') { ac = '#00d4ff'; bg = '#000814'; }
-        if(t === 'void') ac = '#ffffff';
-
+        if(t === 'aura') { ac = '#ffcc00'; bg = '#1a0033'; }
         document.documentElement.style.setProperty('--accent', ac);
-        if(!localStorage.getItem('nx_customBg')) document.documentElement.style.setProperty('--bg', bg);
+        if(!localStorage.getItem('nx_custom_bg')) document.documentElement.style.setProperty('--bg', bg);
         document.documentElement.style.setProperty('--glow', `0 0 20px ${ac}66`);
-    },
-
-    uploadBg: function(input) {
-        if(input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = e.target.result;
-                localStorage.setItem('nx_customBg', data);
-                document.getElementById('mainBody').style.background = `url(${data})`;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    },
-
-    clearBg: function() {
-        localStorage.removeItem('nx_customBg');
-        location.reload();
-    },
-
-    loadMedia: function() {
-        const val = document.getElementById('mediaInput').value;
-        document.getElementById('mediaFrame').src = val;
     },
 
     setFont: function(f) { document.documentElement.style.setProperty('--font-main', f); },
 
     softReset: function() {
         localStorage.removeItem('nx_theme');
-        localStorage.removeItem('nx_customBg');
+        localStorage.removeItem('nx_custom_bg');
         location.reload();
-    }
-};
-
-const game = {
-    bits: 0, power: 1, auto: 0,
-    cpuCost: 15, autoCost: 50,
-    init: function() {
-        setInterval(() => {
-            this.bits += this.auto;
-            this.update();
-        }, 1000);
-    },
-    click: function() {
-        this.bits += this.power;
-        this.update();
-    },
-    buy: function(type) {
-        if(type === 'cpu' && this.bits >= this.cpuCost) {
-            this.bits -= this.cpuCost;
-            this.power++;
-            this.cpuCost = Math.floor(this.cpuCost * 1.5);
-        } else if(type === 'auto' && this.bits >= this.autoCost) {
-            this.bits -= this.autoCost;
-            this.auto += 2;
-            this.autoCost = Math.floor(this.autoCost * 1.8);
-        }
-        this.update();
-    },
-    update: function() {
-        document.getElementById('bitCount').innerText = Math.floor(this.bits);
-        document.getElementById('cpuCost').innerText = this.cpuCost;
-        document.getElementById('autoCost').innerText = this.autoCost;
     }
 };
 
@@ -296,8 +322,8 @@ const particles = {
         this.items = Array.from({length: 40}, () => ({
             x: Math.random() * this.cvs.width,
             y: Math.random() * this.cvs.height,
-            v: Math.random() * 2 + 1,
-            c: '0'
+            v: Math.random() * 1.5 + 0.5,
+            c: this.chars[0]
         }));
         this.loop();
     },
@@ -305,13 +331,10 @@ const particles = {
     loop: function() {
         this.ctx.clearRect(0,0,this.cvs.width, this.cvs.height);
         this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-        this.ctx.font = "12px monospace";
+        this.ctx.globalAlpha = 0.4;
         this.items.forEach(p => {
             p.y -= p.v;
-            if(p.y < -20) {
-                p.y = this.cvs.height + 20;
-                p.c = this.chars[Math.floor(Math.random()*this.chars.length)];
-            }
+            if(p.y < -20) { p.y = this.cvs.height + 20; p.c = this.chars[Math.floor(Math.random()*this.chars.length)]; }
             this.ctx.fillText(p.c, p.x, p.y);
         });
         requestAnimationFrame(() => this.loop());
@@ -322,3 +345,4 @@ app.init();
 </script>
 </body>
 </html>
+
