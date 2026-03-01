@@ -1,7 +1,86 @@
-// ... same HTML as above, but change the function to:
-function doSearch() {
-  const q = document.getElementById('query').value.trim();
-  if (!q) return;
-  const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`;
-  window.location.href = url;  // Same tab
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Downloadable Arcade - Free HTML5 Games</title>
+  <style>
+    body {
+      background: #0d0d0d;
+      color: #e0e0e0;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { color: #00ff00; margin-bottom: 15px; }
+    p.intro { max-width: 800px; margin: 0 auto 40px; font-size: 1.1em; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0,255,0,0.1);
+      transition: transform 0.3s;
+    }
+    .card:hover { transform: translateY(-10px); }
+    .title { font-size: 1.6em; color: #00ff88; margin-bottom: 10px; }
+    .desc { font-size: 1em; margin-bottom: 20px; }
+    .btn-download {
+      display: inline-block;
+      padding: 12px 30px;
+      background: #006600;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    .btn-download:hover { background: #009900; }
+  </style>
+</head>
+<body>
+  <h1>My Downloadable Arcade</h1>
+  <p class="intro">Grab these free, open-source HTML5 games as ZIPs! Unzip anywhere → open index.html in your browser. No install needed. Add more anytime from GitHub!</p>
+
+  <div class="grid">
+
+    <!-- 2048 - Classic puzzle -->
+    <div class="card">
+      <div class="title">2048</div>
+      <p class="desc">Slide and merge tiles to reach 2048. Super addictive puzzle game.</p>
+      <a href="games/2048.zip" download class="btn-download">Download ZIP</a>
+      <p style="font-size:0.9em; margin-top:10px;">Source: gabrielecirulli/2048 on GitHub</p>
+    </div>
+
+    <!-- Monster Wants Candy - Action/arcade -->
+    <div class="card">
+      <div class="title">Monster Wants Candy</div>
+      <p class="desc">Help the monster collect candy while avoiding obstacles. Fun platformer.</p>
+      <a href="games/Monster-Wants-Candy.zip" download class="btn-download">Download ZIP</a>
+      <p style="font-size:0.9em; margin-top:10px;">Source: EnclaveGames/Monster-Wants-Candy</p>
+    </div>
+
+    <!-- Hexagame - Word puzzle (if you add the wordlist.zip separately) -->
+    <div class="card">
+      <div class="title">Hexagame</div>
+      <p class="desc">Rearrange tiles to form words. Open-source word puzzle.</p>
+      <a href="games/hexagame.zip" download class="btn-download">Download ZIP</a>
+      <p style="font-size:0.9em; margin-top:10px;">Source: cubiq/hexagame (add wordlist from hexaga.me/dict/wordlist.zip)</p>
+    </div>
+
+    <!-- Add more cards here as you download games -->
+
+  </div>
+
+  <p style="margin-top:50px; font-size:1.1em;">
+    How to add games: Go to GitHub → search "html5 game [name]" → Download ZIP of repo → unzip → rename folder → re-zip → upload to your site's /games/ folder. Update the links!
+  </p>
+</body>
+</html>
