@@ -1,35 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#000; color:#fff; font-family:Arial,sans-serif;">
+<html lang="en" style="background:#000; color:#fff; font-family:Arial, sans-serif;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Search Anything</title>
+  <title>Embedded Search Anything</title>
   <style>
     body { margin:0; padding:20px; text-align:center; }
-    input { width:80%; max-width:600px; padding:12px; font-size:18px; border:none; border-radius:8px; }
-    button { padding:12px 20px; font-size:18px; margin-left:10px; border:none; border-radius:8px; background:#0066cc; color:white; cursor:pointer; }
-    iframe { width:100%; height:80vh; border:none; margin-top:20px; background:#111; }
+    input { width:70%; max-width:500px; padding:15px; font-size:18px; border:none; border-radius:30px 0 0 30px; }
+    button { padding:15px 30px; font-size:18px; border:none; border-radius:0 30px 30px 0; background:#0066cc; color:white; cursor:pointer; }
+    iframe { width:100%; height:70vh; border:none; margin-top:30px; background:#111; display:none; border-radius:10px; }
   </style>
+  <!-- Bypass for blocked iframes -->
+  <script type="module" src="https://unpkg.com/x-frame-bypass"></script>
 </head>
 <body>
-  <h2>Search Anything (via DuckDuckGo HTML - Lite Alternative)</h2>
-  <input type="text" id="query" placeholder="Type here... e.g. hi, slope unblocked, tiktok" autofocus>
-  <button onclick="search()">Go</button>
+  <h1>Search Anything – Stay Here</h1>
+  <input type="text" id="query" placeholder="Type & Go or Enter..." autofocus>
+  <button onclick="embedSearch()">Go</button>
   
-  <iframe id="results" src="https://html.duckduckgo.com/html/"></iframe>
+  <iframe id="results" is="x-frame-bypass"></iframe>
 
   <script>
-    function search() {
+    function embedSearch() {
       const q = document.getElementById('query').value.trim();
       if (q) {
         const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`;
-        document.getElementById('results').src = url;
+        const frame = document.getElementById('results');
+        frame.src = url;
+        frame.style.display = 'block';
       }
     }
-    
-    // Search on Enter
-    document.getElementById('query').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') search();
+
+    document.getElementById('query').addEventListener('keypress', e => {
+      if (e.key === 'Enter') embedSearch();
     });
   </script>
 </body>
