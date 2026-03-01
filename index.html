@@ -12,22 +12,22 @@
   </style>
 </head>
 <body>
-  <h2>Search Anything (via DuckDuckGo)</h2>
+  <h2>Search Anything (via DuckDuckGo HTML - Lite Alternative)</h2>
   <input type="text" id="query" placeholder="Type here... e.g. hi, slope unblocked, tiktok" autofocus>
   <button onclick="search()">Go</button>
   
-  <iframe id="results" src="https://lite.duckduckgo.com/lite/"></iframe>
+  <iframe id="results" src="https://html.duckduckgo.com/html/"></iframe>
 
   <script>
     function search() {
       const q = document.getElementById('query').value.trim();
       if (q) {
-        const url = `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(q)}`;
+        const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`;
         document.getElementById('results').src = url;
       }
     }
     
-    // Optional: search on Enter key
+    // Search on Enter
     document.getElementById('query').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') search();
     });
