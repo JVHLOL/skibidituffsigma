@@ -1,1 +1,53 @@
-i love cp
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cheese Survey 🧀</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background: #fff8dc;
+    }
+    button {
+      font-size: 20px;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Do you love cheese? 🧀</h1>
+
+<button onclick="vote('yes')">Yes</button>
+<button onclick="vote('no')">No</button>
+
+<h2>Results</h2>
+<p>Yes: <span id="yesCount">0</span></p>
+<p>No: <span id="noCount">0</span></p>
+
+<script>
+  let yes = localStorage.getItem("cheese_yes") || 0;
+  let no = localStorage.getItem("cheese_no") || 0;
+
+  document.getElementById("yesCount").textContent = yes;
+  document.getElementById("noCount").textContent = no;
+
+  function vote(choice) {
+    if (choice === "yes") {
+      yes++;
+      localStorage.setItem("cheese_yes", yes);
+    } else {
+      no++;
+      localStorage.setItem("cheese_no", no);
+    }
+
+    document.getElementById("yesCount").textContent = yes;
+    document.getElementById("noCount").textContent = no;
+  }
+</script>
+
+</body>
+</html>
